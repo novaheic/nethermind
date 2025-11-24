@@ -23,7 +23,7 @@ namespace Nethermind.AuRa.Test.Contract;
 
 public class AuRaContractGasLimitOverrideTests
 {
-    private const int CorrectHeadGasLimit = 100000000;
+    private const ulong CorrectHeadGasLimit = 100_000_000UL;
 
     // TestContract:
     // pragma solidity ^0.5.0;
@@ -36,7 +36,7 @@ public class AuRaContractGasLimitOverrideTests
     public async Task can_read_block_gas_limit_from_contract()
     {
         using TestGasLimitContractBlockchain chain = await TestContractBlockchain.ForTest<TestGasLimitContractBlockchain, AuRaContractGasLimitOverrideTests>();
-        long gasLimit = chain.GasLimitCalculator.GetGasLimit(chain.BlockTree.Head.Header);
+        ulong gasLimit = chain.GasLimitCalculator.GetGasLimit(chain.BlockTree.Head.Header);
         gasLimit.Should().Be(CorrectHeadGasLimit);
     }
 
@@ -45,7 +45,7 @@ public class AuRaContractGasLimitOverrideTests
     {
         using TestGasLimitContractBlockchain chain = await TestContractBlockchain.ForTest<TestGasLimitContractBlockchain, AuRaContractGasLimitOverrideTests>();
         chain.GasLimitCalculator.GetGasLimit(chain.BlockTree.Head.Header);
-        long? gasLimit = chain.GasLimitOverrideCache.GasLimitCache.Get(chain.BlockTree.Head.Hash);
+        ulong? gasLimit = chain.GasLimitOverrideCache.GasLimitCache.Get(chain.BlockTree.Head.Hash);
         gasLimit.Should().Be(CorrectHeadGasLimit);
     }
 
@@ -61,7 +61,7 @@ public class AuRaContractGasLimitOverrideTests
     public async Task can_validate_gas_limit_incorrect()
     {
         using TestGasLimitContractBlockchain chain = await TestContractBlockchain.ForTest<TestGasLimitContractBlockchain, AuRaContractGasLimitOverrideTests>();
-        bool isValid = ((AuRaContractGasLimitOverride)chain.GasLimitCalculator).IsGasLimitValid(chain.BlockTree.Head.Header, 100000001, out long? expectedGasLimit);
+        bool isValid = ((AuRaContractGasLimitOverride)chain.GasLimitCalculator).IsGasLimitValid(chain.BlockTree.Head.Header, 100_000_001UL, out ulong? expectedGasLimit);
         isValid.Should().BeFalse();
         expectedGasLimit.Should().Be(CorrectHeadGasLimit);
     }
@@ -70,7 +70,7 @@ public class AuRaContractGasLimitOverrideTests
     public async Task skip_validate_gas_limit_before_enabled()
     {
         using TestGasLimitContractBlockchainLateBlockGasLimit chain = await TestContractBlockchain.ForTest<TestGasLimitContractBlockchainLateBlockGasLimit, AuRaContractGasLimitOverrideTests>();
-        bool isValid = ((AuRaContractGasLimitOverride)chain.GasLimitCalculator).IsGasLimitValid(chain.BlockTree.Genesis, 100000001, out _);
+        bool isValid = ((AuRaContractGasLimitOverride)chain.GasLimitCalculator).IsGasLimitValid(chain.BlockTree.Genesis, 100_000_001UL, out _);
         isValid.Should().BeTrue();
     }
 

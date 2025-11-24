@@ -60,14 +60,16 @@ public class GasEstimator(
         }
 
         long lowerBound = IntrinsicGasCalculator.Calculate(tx, releaseSpec).MinimalGas;
+        long txGasLimit = ToSignedGas(tx.GasLimit, "transaction gas limit");
+        long headerGasLimit = ToSignedGas(header.GasLimit, "block gas limit");
 
         // Setting boundaries for binary search - determine lowest and highest gas can be used during the estimation:
         long leftBound = gasTracer.GasSpent != 0 && gasTracer.GasSpent >= lowerBound
             ? gasTracer.GasSpent - 1
             : lowerBound - 1;
-        long rightBound = tx.GasLimit != 0 && (long)tx.GasLimit >= lowerBound
-            ? (long)tx.GasLimit
-            : (long)header.GasLimit;
+        long rightBound = txGasLimit != 0 && txGasLimit >= lowerBound
+            ? txGasLimit
+            : headerGasLimit;
         rightBound = Math.Min(rightBound, releaseSpec.GetTxGasLimitCap());
 
         if (leftBound > rightBound)
@@ -150,5 +152,15 @@ public class GasEstimator(
         TransactionResult result = transactionProcessor.CallAndRestore(txClone, gasTracer.WithCancellation(token));
 
         return result.TransactionExecuted && gasTracer.StatusCode == StatusCode.Success && !gasTracer.OutOfGas;
+    }
+
+    private static long ToSignedGas(ulong gas, string source)
+    {
+        if (gas > long.MaxValue)
+        {
+            throw new OverflowException($"{source} ({gas}) exceeds supported range.");
+        }
+
+        return (long)gas;
     }
 }

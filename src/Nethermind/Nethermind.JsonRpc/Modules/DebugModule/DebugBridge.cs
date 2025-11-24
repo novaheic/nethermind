@@ -225,6 +225,7 @@ public class DebugBridge : IDebugBridge
         foreach (TransactionForRpc txForRpc in bundle.Transactions)
         {
             Transaction tx = txForRpc.ToTransaction();
+            long txGasLimit = ToSignedGas(tx.GasLimit, "transaction gas limit");
             GethLikeTxTrace? trace;
 
             try
@@ -240,16 +241,26 @@ public class DebugBridge : IDebugBridge
                 trace = new GethLikeTxTrace
                 {
                     Failed = true,
-                    Gas = (long)tx.GasLimit,
+                    Gas = txGasLimit,
                     ReturnValue = []
                 };
             }
 
             if (trace is not null)
             {
-                trace.Gas = (long)tx.GasLimit;
+                trace.Gas = txGasLimit;
                 yield return trace;
             }
         }
+    }
+
+    private static long ToSignedGas(ulong gas, string source)
+    {
+        if (gas > long.MaxValue)
+        {
+            throw new OverflowException($"{source} ({gas}) exceeds supported range.");
+        }
+
+        return (long)gas;
     }
 }

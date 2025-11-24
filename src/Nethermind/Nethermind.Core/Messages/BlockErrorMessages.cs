@@ -119,6 +119,12 @@ public static class BlockErrorMessages
     public const string NegativeGasUsed =
         "NegativeGasUsed: Cannot be negative.";
 
+    public const string GasLimitOutOfRange =
+        "GasLimitOutOfRange: Gas limit exceeds supported range.";
+
+    public const string GasUsedOutOfRange =
+        "GasUsedOutOfRange: Gas used exceeds supported range.";
+
     public const string MissingRequests =
         "MissingRequests: Requests cannot be null in block when EIP-6110 or EIP-7002 are activated.";
 

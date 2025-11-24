@@ -207,25 +207,28 @@ namespace Nethermind.Consensus.Validators
 
         protected virtual bool ValidateFieldLimit(BlockHeader blockHeader, ref string? error)
         {
-            // Note, these are out of spec. Technically, there could be a block with field with very high value that is
-            // valid when using ulong, but wrapped to negative value when using long. However, switching to ulong
-            // at this point can cause other unexpected error. So we just won't support it for now.
+            if (blockHeader.Number < 0)
+            {
+                if (_logger.IsWarn) _logger.Warn($"Invalid block header ({blockHeader.Hash}) - block number is negative {blockHeader.Number}");
+                error = BlockErrorMessages.NegativeBlockNumber;
+                return false;
+            }
 
-            error = (long)blockHeader.Number < 0 ? BlockErrorMessages.NegativeBlockNumber
-                : (long)blockHeader.GasLimit < 0 ? BlockErrorMessages.NegativeGasLimit
-                : (long)blockHeader.GasUsed < 0 ? BlockErrorMessages.NegativeGasUsed
-                : null;
+            if (blockHeader.GasLimit > long.MaxValue)
+            {
+                if (_logger.IsWarn) _logger.Warn($"Invalid block header ({blockHeader.Hash}) - gas limit {blockHeader.GasLimit} exceeds supported range.");
+                error = BlockErrorMessages.GasLimitOutOfRange;
+                return false;
+            }
 
-            if (error is null) return true;
+            if (blockHeader.GasUsed > long.MaxValue)
+            {
+                if (_logger.IsWarn) _logger.Warn($"Invalid block header ({blockHeader.Hash}) - gas used {blockHeader.GasUsed} exceeds supported range.");
+                error = BlockErrorMessages.GasUsedOutOfRange;
+                return false;
+            }
 
-            if (_logger.IsWarn)
-                _logger.Warn($"Invalid block header ({blockHeader.Hash}) - {((long)blockHeader.Number < 0 ? $"Block number is negative {blockHeader.Number}"
-                    : (long)blockHeader.GasLimit < 0 ? $"Block GasLimit is negative {blockHeader.GasLimit}"
-                    : (long)blockHeader.GasUsed < 0 ? $"Block GasUsed is negative {blockHeader.GasUsed}"
-                    : error)}");
-
-            return false;
-
+            return true;
         }
 
         protected virtual bool ValidateExtraData(BlockHeader header, IReleaseSpec spec, bool isUncle, ref string? error)
@@ -247,7 +250,14 @@ namespace Nethermind.Consensus.Validators
 
         protected virtual bool ValidateGasLimitRange(BlockHeader header, BlockHeader parent, IReleaseSpec spec, ref string? error)
         {
-            long adjustedParentGasLimit = Eip1559GasLimitAdjuster.AdjustGasLimit(spec, (long)parent.GasLimit, header.Number);
+            if (!TryToSignedGas(parent.GasLimit, out long parentGasLimit))
+            {
+                if (_logger.IsWarn) _logger.Warn($"Invalid block header ({header.Hash}) - parent gas limit {parent.GasLimit} exceeds supported range.");
+                error = BlockErrorMessages.GasLimitOutOfRange;
+                return false;
+            }
+
+            long adjustedParentGasLimit = Eip1559GasLimitAdjuster.AdjustGasLimit(spec, parentGasLimit, header.Number);
             long maxGasLimitDifference = adjustedParentGasLimit / spec.GasLimitBoundDivisor;
 
             long maxNextGasLimit = adjustedParentGasLimit + maxGasLimitDifference;
@@ -368,6 +378,18 @@ namespace Nethermind.Consensus.Validators
                 }
             }
 
+            return true;
+        }
+
+        private static bool TryToSignedGas(ulong gasLimit, out long signed)
+        {
+            if (gasLimit > long.MaxValue)
+            {
+                signed = 0;
+                return false;
+            }
+
+            signed = (long)gasLimit;
             return true;
         }
     }

@@ -58,7 +58,8 @@ public class OptimismTransactionProcessor(
                 WorldState.IncrementNonce(tx.SenderAddress!);
             }
             header.GasUsed += tx.GasLimit;
-            tracer.MarkAsFailed(tx.To!, (long)tx.GasLimit, [], $"failed deposit: {result.ErrorDescription}");
+            long txGasLimit = ToSignedGas(tx.GasLimit, "transaction gas limit");
+            tracer.MarkAsFailed(tx.To!, txGasLimit, [], $"failed deposit: {result.ErrorDescription}");
             result = TransactionResult.Ok;
         }
 
@@ -97,7 +98,8 @@ public class OptimismTransactionProcessor(
             }
 
             UInt256 l1Cost = _currentTxL1Cost ??= costHelper.ComputeL1Cost(tx, header, WorldState);
-            UInt256 maxOperatorCost = costHelper.ComputeOperatorCost((long)tx.GasLimit, header, WorldState);
+            long txGasLimit = ToSignedGas(tx.GasLimit, "transaction gas limit");
+            UInt256 maxOperatorCost = costHelper.ComputeOperatorCost(txGasLimit, header, WorldState);
 
             if (UInt256.SubtractUnderflow(balanceLeft, l1Cost + maxOperatorCost, out balanceLeft))
             {
@@ -156,7 +158,7 @@ public class OptimismTransactionProcessor(
 
             if (opSpecHelper.IsIsthmus(header))
             {
-                UInt256 operatorCostMax = costHelper.ComputeOperatorCost((long)tx.GasLimit, header, WorldState);
+                UInt256 operatorCostMax = costHelper.ComputeOperatorCost(ToSignedGas(tx.GasLimit, "transaction gas limit"), header, WorldState);
                 UInt256 operatorCostUsed = costHelper.ComputeOperatorCost(spentGas, header, WorldState);
 
                 if (operatorCostMax > operatorCostUsed)
@@ -180,7 +182,8 @@ public class OptimismTransactionProcessor(
         {
             // Record deposits as using all their gas
             // System Transactions are special & are not recorded as using any gas (anywhere)
-            var gas = tx.IsOPSystemTransaction ? 0 : (long)tx.GasLimit;
+            long txGasLimit = ToSignedGas(tx.GasLimit, "transaction gas limit");
+            long gas = tx.IsOPSystemTransaction ? 0 : txGasLimit;
             return gas;
         }
 

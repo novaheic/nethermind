@@ -77,7 +77,7 @@ namespace Nethermind.Blockchain.Receipts
             private readonly bool _forceRecoverSender;
             private readonly IEthereumEcdsa _ecdsa;
 
-            private long _gasUsedBefore = 0;
+            private ulong _gasUsedBefore = 0;
             private int _transactionIndex = 0;
 
             public RecoveryContext(IReleaseSpec releaseSpec, ReceiptRecoveryBlock block, bool forceRecoverSender, IEthereumEcdsa ecdsa)
@@ -112,13 +112,13 @@ namespace Nethermind.Blockchain.Receipts
 
                 // how would it be in CREATE2?
                 receipt.ContractAddress = transaction.IsContractCreation && transaction.SenderAddress is not null ? ContractAddress.From(receipt.Sender, transaction.Nonce) : null;
-                receipt.GasUsed = receipt.GasUsedTotal - (ulong)_gasUsedBefore;
+                receipt.GasUsed = receipt.GasUsedTotal - _gasUsedBefore;
                 if (receipt.StatusCode != StatusCode.Success)
                 {
                     receipt.StatusCode = (receipt.Logs?.Length ?? 0) == 0 ? StatusCode.Failure : StatusCode.Success;
                 }
 
-                IncrementContext((long)receipt.GasUsedTotal);
+                IncrementContext(receipt.GasUsedTotal);
             }
 
             public void RecoverReceiptData(ref TxReceiptStructRef receipt)
@@ -143,16 +143,16 @@ namespace Nethermind.Blockchain.Receipts
 
                 // how would it be in CREATE2?
                 receipt.ContractAddress = (transaction.IsContractCreation && transaction.SenderAddress is not null ? ContractAddress.From(receipt.Sender.ToAddress(), transaction.Nonce) : Address.Zero)!.ToStructRef();
-                receipt.GasUsed = receipt.GasUsedTotal - (ulong)_gasUsedBefore;
+                receipt.GasUsed = receipt.GasUsedTotal - _gasUsedBefore;
                 if (receipt.StatusCode != StatusCode.Success)
                 {
                     receipt.StatusCode = (receipt.Logs?.Length ?? 0) == 0 ? StatusCode.Failure : StatusCode.Success;
                 }
 
-                IncrementContext((long)receipt.GasUsedTotal);
+                IncrementContext(receipt.GasUsedTotal);
             }
 
-            private void IncrementContext(long gasUsedTotal)
+            private void IncrementContext(ulong gasUsedTotal)
             {
                 _transactionIndex++;
                 _gasUsedBefore = gasUsedTotal;

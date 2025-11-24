@@ -166,8 +166,10 @@ public class BlockValidator(
         error = null;
         if (processedBlock.Header.GasUsed != suggestedBlock.Header.GasUsed)
         {
-            if (_logger.IsWarn) _logger.Warn($"- gas used: expected {suggestedBlock.Header.GasUsed}, got {processedBlock.Header.GasUsed} (diff: {(long)processedBlock.Header.GasUsed - (long)suggestedBlock.Header.GasUsed})");
-            error ??= BlockErrorMessages.HeaderGasUsedMismatch((long)suggestedBlock.Header.GasUsed, (long)processedBlock.Header.GasUsed);
+            long suggestedGasUsed = ToSignedGas(suggestedBlock.Header.GasUsed, "suggested block gas used");
+            long processedGasUsed = ToSignedGas(processedBlock.Header.GasUsed, "processed block gas used");
+            if (_logger.IsWarn) _logger.Warn($"- gas used: expected {suggestedGasUsed}, got {processedGasUsed} (diff: {processedGasUsed - suggestedGasUsed})");
+            error ??= BlockErrorMessages.HeaderGasUsedMismatch(suggestedGasUsed, processedGasUsed);
         }
 
         if (processedBlock.Header.Bloom != suggestedBlock.Header.Bloom)
@@ -417,4 +419,14 @@ public class BlockValidator(
     }
 
     private static string Invalid(Block block) => $"Invalid block {block.ToString(Block.Format.FullHashAndNumber)}:";
+
+    private static long ToSignedGas(ulong gas, string source)
+    {
+        if (gas > long.MaxValue)
+        {
+            throw new OverflowException($"{source} ({gas}) exceeds supported range.");
+        }
+
+        return (long)gas;
+    }
 }

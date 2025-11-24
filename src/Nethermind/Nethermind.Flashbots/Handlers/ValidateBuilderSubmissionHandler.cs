@@ -121,13 +121,15 @@ public class ValidateSubmissionHandler
             return false;
         }
 
-        if (message.GasLimit != (long)block.GasLimit)
+        long blockGasLimit = ToSignedGas(block.GasLimit, "block gas limit");
+        if (message.GasLimit != blockGasLimit)
         {
             error = $"Gas limit mismatch. Expected {message.GasLimit} but got {block.GasLimit}";
             return false;
         }
 
-        if (message.GasUsed != (long)block.GasUsed)
+        long blockGasUsed = ToSignedGas(block.GasUsed, "block gas used");
+        if (message.GasUsed != blockGasUsed)
         {
             error = $"Gas used mismatch. Expected {message.GasUsed} but got {block.GasUsed}";
             return false;
@@ -294,7 +296,8 @@ public class ValidateSubmissionHandler
 
         long calculatedGasLimit = GetGasLimit(parentHeader, registerGasLimit, releaseSpec);
 
-        if (calculatedGasLimit != (long)block.Header.GasLimit)
+        long headerGasLimit = ToSignedGas(block.Header.GasLimit, "block gas limit");
+        if (calculatedGasLimit != headerGasLimit)
         {
             error = $"Gas limit mismatch. Expected {calculatedGasLimit} but got {block.Header.GasLimit}";
             return false;
@@ -305,7 +308,7 @@ public class ValidateSubmissionHandler
 
     private long GetGasLimit(BlockHeader parentHeader, long desiredGasLimit, IReleaseSpec releaseSpec)
     {
-        long parentGasLimit = (long)parentHeader.GasLimit;
+        long parentGasLimit = ToSignedGas(parentHeader.GasLimit, "parent gas limit");
         long gasLimit = parentGasLimit;
 
         long? targetGasLimit = desiredGasLimit;
@@ -406,4 +409,14 @@ public class ValidateSubmissionHandler
     }
 
     public record ProcessingEnv(IBlockProcessor BlockProcessor, IWorldState WorldState);
+
+    private static long ToSignedGas(ulong gas, string source)
+    {
+        if (gas > long.MaxValue)
+        {
+            throw new OverflowException($"{source} ({gas}) exceeds supported range.");
+        }
+
+        return (long)gas;
+    }
 }

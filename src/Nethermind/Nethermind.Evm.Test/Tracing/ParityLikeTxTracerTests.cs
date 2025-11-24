@@ -44,7 +44,8 @@ public class ParityLikeTxTracerTests : VirtualMachineTestsBase
         Assert.That(trace.BlockNumber, Is.EqualTo(block.Number), "number");
         Assert.That(trace.TransactionPosition, Is.EqualTo(0), "tx index");
         Assert.That(trace.TransactionHash, Is.EqualTo(tx.Hash), "tx hash");
-        Assert.That(trace.Action.Gas, Is.EqualTo((long)tx.GasLimit - 21000), "gas");
+        long txGasLimit = ToSignedGas(tx.GasLimit);
+        Assert.That(trace.Action.Gas, Is.EqualTo(txGasLimit - 21000), "gas");
         Assert.That(trace.Action.Value, Is.EqualTo(tx.Value), "value");
         Assert.That(trace.Action.Input, Is.EqualTo(tx.Data.AsArray()), "input");
         Assert.That(trace.Action.TraceAddress, Is.EqualTo(Array.Empty<int>()), "trace address");
@@ -822,5 +823,15 @@ public class ParityLikeTxTracerTests : VirtualMachineTestsBase
         ParityLikeTxTracer tracer = new(block, transaction, ParityTraceTypes.Trace | ParityTraceTypes.StateDiff);
         _ = _processor.Execute(transaction, new BlockExecutionContext(block.Header, Spec), tracer);
         return (tracer.BuildResult(), block, transaction);
+    }
+
+    private static long ToSignedGas(ulong gasLimit)
+    {
+        if (gasLimit > long.MaxValue)
+        {
+            throw new OverflowException($"Gas limit {gasLimit} exceeds supported range.");
+        }
+
+        return (long)gasLimit;
     }
 }

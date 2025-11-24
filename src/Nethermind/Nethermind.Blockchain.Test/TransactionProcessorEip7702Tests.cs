@@ -329,7 +329,7 @@ internal class TransactionProcessorEip7702Tests
         _stateProvider.InsertCode(codeSource, executionErrorCode, Prague.Instance);
         _stateProvider.CreateAccount(sender.Address, 1.Ether());
 
-        const long gasLimit = 10_000_000;
+        const ulong gasLimit = 10_000_000;
         Transaction tx = Build.A.Transaction
             .WithType(TxType.SetCode)
             .WithTo(codeSource)
@@ -346,7 +346,7 @@ internal class TransactionProcessorEip7702Tests
         Block block = Build.A.Block.WithNumber(long.MaxValue)
             .WithTimestamp(MainnetSpecProvider.PragueBlockTimestamp)
             .WithTransactions(tx)
-            .WithGasLimit(long.MaxValue).TestObject;
+            .WithGasLimit(ulong.MaxValue).TestObject;
 
         CallOutputTracer tracer = new();
 

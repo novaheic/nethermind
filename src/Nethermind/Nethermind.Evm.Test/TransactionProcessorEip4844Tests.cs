@@ -58,13 +58,13 @@ internal class TransactionProcessorEip4844Tests
         _stateProvider.Commit(_specProvider.GenesisSpec);
         _stateProvider.CommitTree(0);
 
-        long gasLimit = GasCostOf.Transaction;
+        ulong gasLimit = GasCostOf.Transaction;
         Transaction blobTx = Build.A.Transaction
             .WithValue(value)
             .WithGasPrice(1)
             .WithMaxFeePerGas(1)
             .WithMaxFeePerBlobGas(maxFeePerBlobGas)
-            .WithGasLimit((ulong)gasLimit)
+            .WithGasLimit(gasLimit)
             .WithShardBlobTxTypeAndFields(blobCount)
             .SignedAndResolved(_ethereumEcdsa, TestItem.PrivateKeyA)
             .TestObject;
@@ -72,7 +72,7 @@ internal class TransactionProcessorEip4844Tests
         Block block = Build.A.Block
             .WithNumber(1)
             .WithTransactions(blobTx)
-            .WithGasLimit((ulong)gasLimit)
+            .WithGasLimit(gasLimit)
             .WithExcessBlobGas(excessBlobGas)
             .WithBaseFeePerGas(1)
             .TestObject;

@@ -82,7 +82,7 @@ namespace Nethermind.Blockchain.Test
                         Build.A.Transaction.WithSenderAddress(TestItem.AddressA).WithNonce(1)
                             .WithGasPrice(20).WithGasLimit(10).WithValue(100).SignedAndResolved(TestItem.PrivateKeyA).TestObject
                     },
-                    GasLimit = 10000000
+                    GasLimit = 10000000UL
                 };
                 balanceCheckWithTxValue.ExpectedSelectedTransactions.AddRange(
                     new[] { 1 }.Select(i => balanceCheckWithTxValue.Transactions[i]));
@@ -122,7 +122,7 @@ namespace Nethermind.Blockchain.Test
                         Build.A.Transaction.WithSenderAddress(TestItem.AddressA).WithType(TxType.EIP1559).WithNonce(1)
                             .WithMaxFeePerGas(30).WithGasLimit(10).WithValue(100).SignedAndResolved(TestItem.PrivateKeyA).TestObject
                     },
-                    GasLimit = 10000000
+                    GasLimit = 10000000UL
                 };
                 balanceCheckWithTxValue.ExpectedSelectedTransactions.AddRange(
                     new[] { 1 }.Select(i => balanceCheckWithTxValue.Transactions[i]));
@@ -140,7 +140,7 @@ namespace Nethermind.Blockchain.Test
                         Build.A.Transaction.WithSenderAddress(TestItem.AddressA).WithNonce(1)
                             .WithMaxFeePerGas(30).WithMaxPriorityFeePerGas(25).WithGasLimit(10).WithType(TxType.EIP1559).WithValue(60).SignedAndResolved(TestItem.PrivateKeyA).TestObject,
                     },
-                    GasLimit = 10000000
+                    GasLimit = 10000000UL
                 };
                 balanceCheckWithGasPremium.ExpectedSelectedTransactions.AddRange(
                     new[] { 1 }.Select(i => balanceCheckWithGasPremium.Transactions[i]));
@@ -563,7 +563,7 @@ namespace Nethermind.Blockchain.Test
                 new Dictionary<Address, (UInt256 Balance, UInt256 Nonce)>();
 
             public List<Transaction> Transactions { get; set; } = new();
-            public long GasLimit { get; set; }
+            public ulong GasLimit { get; set; }
             public List<Transaction> ExpectedSelectedTransactions { get; } = new();
             public UInt256 MinGasPriceForMining { get; set; } = 1;
 
@@ -584,7 +584,7 @@ namespace Nethermind.Blockchain.Test
                         Build.A.Transaction.WithSenderAddress(TestItem.AddressA).WithNonce(2).WithValue(10)
                             .WithGasPrice(10).WithGasLimit(10).SignedAndResolved(TestItem.PrivateKeyA).TestObject
                     },
-                    GasLimit = 10000000,
+                    GasLimit = 10000000UL,
                     ReleaseSpec = Berlin.Instance
                 };
 
@@ -603,7 +603,7 @@ namespace Nethermind.Blockchain.Test
                         Build.A.Transaction.WithSenderAddress(TestItem.AddressA).WithNonce(2).WithValue(10)
                             .WithGasPrice(10).WithGasLimit(10).SignedAndResolved(TestItem.PrivateKeyA).TestObject
                     },
-                    GasLimit = 10000000
+                    GasLimit = 10000000UL
                 };
 
             public static ProperTransactionsSelectedTestCase Eip1559Default =>
@@ -621,7 +621,7 @@ namespace Nethermind.Blockchain.Test
                         Build.A.Transaction.WithSenderAddress(TestItem.AddressA).WithType(TxType.EIP1559).WithNonce(2).WithValue(10)
                             .WithMaxFeePerGas(10).WithGasLimit(10).SignedAndResolved(TestItem.PrivateKeyA).TestObject
                     },
-                    GasLimit = 10000000
+                    GasLimit = 10000000UL
                 };
 
             public List<Address> MissingAddresses { get; } = new();

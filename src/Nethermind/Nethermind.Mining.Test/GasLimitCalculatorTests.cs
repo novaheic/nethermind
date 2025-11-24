@@ -14,12 +14,12 @@ namespace Nethermind.Mining.Test
     [TestFixture]
     public class GasLimitCalculatorTests
     {
-        [TestCase(1000000, 2000000, 1000975)]
-        [TestCase(1999999, 2000000, 2000000)]
-        [TestCase(2000000, 2000000, 2000000)]
-        [TestCase(2000001, 2000000, 2000000)]
-        [TestCase(3000000, 2000000, 2997072)]
-        public void Test(long current, long target, long expected)
+        [TestCase(1_000_000UL, 2_000_000, 1_000_975UL)]
+        [TestCase(1_999_999UL, 2_000_000, 2_000_000UL)]
+        [TestCase(2_000_000UL, 2_000_000, 2_000_000UL)]
+        [TestCase(2_000_001UL, 2_000_000, 2_000_000UL)]
+        [TestCase(3_000_000UL, 2_000_000, 2_997_072UL)]
+        public void Test(ulong current, long target, ulong expected)
         {
             BlocksConfig blocksConfig = new();
             blocksConfig.TargetBlockGasLimit = target;
@@ -27,7 +27,7 @@ namespace Nethermind.Mining.Test
             TargetAdjustedGasLimitCalculator targetAdjustedGasLimitCalculator = new(
                 MainnetSpecProvider.Instance, blocksConfig);
 
-            BlockHeader header = Build.A.BlockHeader.WithGasLimit((ulong)current).TestObject;
+            BlockHeader header = Build.A.BlockHeader.WithGasLimit(current).TestObject;
             targetAdjustedGasLimitCalculator.GetGasLimit(header).Should().Be(expected);
         }
     }

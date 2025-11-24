@@ -41,7 +41,7 @@ public sealed class NativeCallTracer : GethLikeNativeTxTracer
         GethTraceOptions options) : base(options)
     {
         IsTracingActions = true;
-        _gasLimit = (long)tx!.GasLimit;
+        _gasLimit = ToSignedGas(tx!.GasLimit);
         _txHash = tx.Hash;
 
         _config = options.TracerConfig?.Deserialize<NativeCallTracerConfig>(EthereumJsonSerializer.JsonOptions) ?? new NativeCallTracerConfig();
@@ -276,4 +276,14 @@ public sealed class NativeCallTracer : GethLikeNativeTxTracer
 
     private static string? ValidateRevertReason(string? errorMessage) =>
         errorMessage?.StartsWith("0x") == false ? errorMessage : null;
+
+    private static long ToSignedGas(ulong gasLimit)
+    {
+        if (gasLimit > long.MaxValue)
+        {
+            throw new OverflowException($"Gas limit {gasLimit} exceeds supported range.");
+        }
+
+        return (long)gasLimit;
+    }
 }

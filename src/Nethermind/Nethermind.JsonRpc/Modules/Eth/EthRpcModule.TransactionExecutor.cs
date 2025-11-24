@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2022 Demerzel Solutions Limited
 // SPDX-License-Identifier: LGPL-3.0-only
 
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -153,7 +154,8 @@ namespace Nethermind.JsonRpc.Modules.Eth
             {
                 if (_rpcConfig.GasCap is not null)
                 {
-                    tx.GasLimit = (ulong)long.Min((long)tx.GasLimit, _rpcConfig.GasCap.Value);
+                    ulong gasCap = (ulong)Math.Max(0, _rpcConfig.GasCap.Value);
+                    tx.GasLimit = Math.Min(tx.GasLimit, gasCap);
                 }
 
                 CallOutput result = _blockchainBridge.Call(header, tx, stateOverride, token);

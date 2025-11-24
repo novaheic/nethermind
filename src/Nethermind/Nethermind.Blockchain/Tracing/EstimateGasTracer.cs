@@ -90,7 +90,7 @@ public class EstimateGasTracer : TxTracer
 
     internal long CalculateAdditionalGasRequired(Transaction tx, IReleaseSpec releaseSpec)
     {
-        long intrinsicGas = (long)tx.GasLimit - IntrinsicGasAt;
+        long intrinsicGas = ToSignedGas(tx.GasLimit) - IntrinsicGasAt;
         return _currentGasAndNesting.Peek().AdditionalGasRequired +
                RefundHelper.CalculateClaimableRefund(intrinsicGas + NonIntrinsicGasSpentBeforeRefund, TotalRefund,
                    releaseSpec);
@@ -183,5 +183,15 @@ public class EstimateGasTracer : TxTracer
     {
         _currentGasAndNesting.Peek().ExtraGasPressure =
             Math.Max(_currentGasAndNesting.Peek().ExtraGasPressure, extraGasPressure);
+    }
+
+    private static long ToSignedGas(ulong gasLimit)
+    {
+        if (gasLimit > long.MaxValue)
+        {
+            throw new OverflowException($"Gas limit {gasLimit} exceeds supported range.");
+        }
+
+        return (long)gasLimit;
     }
 }

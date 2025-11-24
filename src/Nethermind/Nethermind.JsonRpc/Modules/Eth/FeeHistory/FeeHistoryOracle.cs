@@ -129,7 +129,7 @@ namespace Nethermind.JsonRpc.Modules.Eth.FeeHistory
                     b.GasUsed / (double)b.GasLimit,
                     blobGasUsedRatio,
                     b.ParentHash,
-                    (long)b.GasUsed,
+                    ToSignedGas(b.GasUsed, "block gas used"),
                     b.Transactions.Length,
                     GetRewardsInBlock(b));
             }
@@ -250,7 +250,7 @@ namespace Nethermind.JsonRpc.Modules.Eth.FeeHistory
                 foreach (TxReceipt receipt in txReceipts)
                 {
                     ulong gasUsedTotal = receipt.GasUsedTotal;
-                    yield return (long)(gasUsedTotal - previousGasUsedTotal);
+                    yield return ToSignedGas(gasUsedTotal - previousGasUsedTotal, "receipt gas used delta");
                     previousGasUsedTotal = gasUsedTotal;
                 }
             }
@@ -261,7 +261,7 @@ namespace Nethermind.JsonRpc.Modules.Eth.FeeHistory
                 ? CalculateGasUsed(receipts)
                 // If no receipts available, approximate on GasLimit
                 // We could just go with null here too and just don't return percentiles
-                : txs.Select(static tx => (long)tx.GasLimit));
+                : txs.Select(tx => ToSignedGas(tx.GasLimit, "transaction gas limit fallback")));
 
             List<RewardInfo> rewardInfos = new(txs.Length);
             Span<long> gasUsedSpan = gasUsed.AsSpan();
@@ -348,6 +348,16 @@ namespace Nethermind.JsonRpc.Modules.Eth.FeeHistory
             }
 
             return _success;
+        }
+
+        private static long ToSignedGas(ulong gas, string source)
+        {
+            if (gas > long.MaxValue)
+            {
+                throw new OverflowException($"{source} ({gas}) exceeds supported range.");
+            }
+
+            return (long)gas;
         }
 
         public void Dispose()

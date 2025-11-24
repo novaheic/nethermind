@@ -223,7 +223,7 @@ namespace Nethermind.Consensus.AuRa.Validators
             _currentValidator.GetReportingValidator().TryReportSkipped(header, parent);
         }
 
-        public IEnumerable<Transaction> GetTransactions(BlockHeader parent, long gasLimit, PayloadAttributes? payloadAttributes, bool filterSource) =>
+        public IEnumerable<Transaction> GetTransactions(BlockHeader parent, ulong gasLimit, PayloadAttributes? payloadAttributes, bool filterSource) =>
             _currentValidator is ITxSource txSource
                 ? txSource.GetTransactions(parent, gasLimit, payloadAttributes, filterSource)
                 : [];

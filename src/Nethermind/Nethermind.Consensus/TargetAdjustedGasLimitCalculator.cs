@@ -13,9 +13,9 @@ namespace Nethermind.Consensus
         private readonly ISpecProvider _specProvider = specProvider ?? throw new ArgumentNullException(nameof(specProvider));
         private readonly IBlocksConfig _blocksConfig = blocksConfig ?? throw new ArgumentNullException(nameof(blocksConfig));
 
-        public long GetGasLimit(BlockHeader parentHeader)
+        public ulong GetGasLimit(BlockHeader parentHeader)
         {
-            long parentGasLimit = (long)parentHeader.GasLimit;
+            long parentGasLimit = ToSignedGas(parentHeader.GasLimit, "parent gas limit");
             long gasLimit = parentGasLimit;
 
             long? targetGasLimit = _blocksConfig.TargetBlockGasLimit;
@@ -30,7 +30,17 @@ namespace Nethermind.Consensus
             }
 
             gasLimit = Eip1559GasLimitAdjuster.AdjustGasLimit(spec, gasLimit, newBlockNumber);
-            return Math.Max(gasLimit, spec.MinGasLimit);
+            return (ulong)Math.Max(gasLimit, spec.MinGasLimit);
+        }
+
+        private static long ToSignedGas(ulong gasLimit, string source)
+        {
+            if (gasLimit > long.MaxValue)
+            {
+                throw new OverflowException($"{source} ({gasLimit}) exceeds supported range.");
+            }
+
+            return (long)gasLimit;
         }
     }
 }

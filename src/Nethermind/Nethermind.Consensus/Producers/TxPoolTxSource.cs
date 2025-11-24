@@ -39,7 +39,7 @@ namespace Nethermind.Consensus.Producers
         private readonly ISpecProvider _specProvider = specProvider ?? throw new ArgumentNullException(nameof(specProvider));
         protected readonly ILogger _logger = logManager?.GetClassLogger<TxPoolTxSource>() ?? throw new ArgumentNullException(nameof(logManager));
 
-        public IEnumerable<Transaction> GetTransactions(BlockHeader parent, long gasLimit, PayloadAttributes? payloadAttributes = null, bool filterSource = false)
+        public IEnumerable<Transaction> GetTransactions(BlockHeader parent, ulong gasLimit, PayloadAttributes? payloadAttributes = null, bool filterSource = false)
         {
             long blockNumber = parent.Number + 1;
             IReleaseSpec spec = NextBlockSpecHelper.GetSpec(_specProvider, parent, payloadAttributes, blocksConfig);
@@ -368,7 +368,7 @@ namespace Nethermind.Consensus.Producers
             return true;
         }
 
-        protected virtual IEnumerable<Transaction> GetOrderedTransactions(IDictionary<AddressAsKey, Transaction[]> pendingTransactions, IComparer<Transaction> comparer, Func<Transaction, bool> filter, long gasLimit) =>
+        protected virtual IEnumerable<Transaction> GetOrderedTransactions(IDictionary<AddressAsKey, Transaction[]> pendingTransactions, IComparer<Transaction> comparer, Func<Transaction, bool> filter, ulong gasLimit) =>
             Order(pendingTransactions, comparer, filter, gasLimit);
 
         private static IEnumerable<(Transaction tx, long blobChain)> GetOrderedBlobTransactions(IDictionary<AddressAsKey, Transaction[]> pendingTransactions, IComparer<Transaction> comparer, Func<Transaction, bool> filter, int maxBlobs = 0) =>
@@ -377,8 +377,17 @@ namespace Nethermind.Consensus.Producers
         protected virtual IComparer<Transaction> GetComparer(BlockHeader parent, BlockPreparationContext blockPreparationContext)
             => _transactionComparerProvider.GetDefaultProducerComparer(blockPreparationContext);
 
-        internal static IEnumerable<Transaction> Order(IDictionary<AddressAsKey, Transaction[]> pendingTransactions, IComparer<Transaction> comparer, Func<Transaction, bool> filter, long gasLimit) =>
-            OrderCore(pendingTransactions, comparer, static tx => (long)tx.SpentGas, filter, gasLimit).Select(static tx => tx.tx);
+        internal static IEnumerable<Transaction> Order(IDictionary<AddressAsKey, Transaction[]> pendingTransactions, IComparer<Transaction> comparer, Func<Transaction, bool> filter, ulong gasLimit)
+        {
+            long resourceLimit = ToSignedGas(gasLimit, "block gas limit");
+            return OrderCore(
+                    pendingTransactions,
+                    comparer,
+                    static tx => ToSignedGas(tx.SpentGas, "transaction spent gas"),
+                    filter,
+                    resourceLimit)
+                .Select(static tx => tx.tx);
+        }
 
         private static IEnumerable<(Transaction tx, long resource)> OrderCore(
             IDictionary<AddressAsKey, Transaction[]> pendingTransactions,
@@ -445,6 +454,16 @@ namespace Nethermind.Consensus.Producers
         public bool SupportsBlobs => _transactionPool.SupportsBlobs;
 
         public override string ToString() => $"{nameof(TxPoolTxSource)}";
+
+        private static long ToSignedGas(ulong gas, string source)
+        {
+            if (gas > long.MaxValue)
+            {
+                throw new OverflowException($"{source} ({gas}) exceeds supported range.");
+            }
+
+            return (long)gas;
+        }
 
         private readonly ref struct ArrayPoolBitMap : IDisposable
         {

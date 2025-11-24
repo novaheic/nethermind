@@ -27,8 +27,8 @@ public class TaikoBlockValidator(
 
     public static readonly Address GoldenTouchAccount = new("0x0000777735367b36bC9B61C50022d9D0700dB4Ec");
 
-    private const long AnchorGasLimit = 250_000;
-    private const long AnchorV3GasLimit = 1_000_000;
+    private const ulong AnchorGasLimit = 250_000;
+    private const ulong AnchorV3GasLimit = 1_000_000;
 
     protected override bool ValidateEip4844Fields(Block block, IReleaseSpec spec, ref string? error) => true; // No blob transactions are expected, covered by ValidateTransactions also
 
@@ -77,7 +77,8 @@ public class TaikoBlockValidator(
             return false;
         }
 
-        if ((long)tx.GasLimit != (spec.IsPacayaEnabled ? AnchorV3GasLimit : AnchorGasLimit))
+        ulong expectedGasLimit = spec.IsPacayaEnabled ? AnchorV3GasLimit : AnchorGasLimit;
+        if (tx.GasLimit != expectedGasLimit)
         {
             errorMessage = "Anchor transaction must have correct gas limit";
             return false;

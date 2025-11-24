@@ -18,6 +18,7 @@ namespace Nethermind.Blockchain.Tracing.ParityStyle;
 public class ParityLikeTxTracer : TxTracer
 {
     private readonly Transaction? _tx;
+    private readonly long? _txGasLimit;
     private readonly ParityTraceTypes _parityTraceTypes;
     private readonly ParityLikeTxTrace _trace;
 
@@ -38,6 +39,7 @@ public class ParityLikeTxTracer : TxTracer
         _parityTraceTypes = parityTraceTypes;
 
         _tx = tx;
+        _txGasLimit = tx is null ? null : ToSignedGas(tx.GasLimit);
         _trace = new ParityLikeTxTrace
         {
             TransactionHash = tx?.Hash,
@@ -219,13 +221,15 @@ public class ParityLikeTxTracer : TxTracer
         _trace.Output = output;
 
         // quick tx fail (before execution)
+        long txGasLimit = _txGasLimit ?? throw new InvalidOperationException("Transaction gas limit is not available.");
+
         _trace.Action ??= new ParityTraceAction
         {
             From = _tx!.SenderAddress,
             To = _tx.To,
             Value = _tx.Value,
             Input = _tx.Data.AsArray(),
-            Gas = (long)_tx.GasLimit,
+            Gas = txGasLimit,
             CallType = _tx.IsMessageCall ? "call" : "init",
             Error = error
         };
@@ -461,5 +465,15 @@ public class ParityLikeTxTracer : TxTracer
     public override void ReportGasUpdateForVmTrace(long refund, long gasAvailable)
     {
         _currentOperation!.Used = gasAvailable;
+    }
+
+    private static long ToSignedGas(ulong gasLimit)
+    {
+        if (gasLimit > long.MaxValue)
+        {
+            throw new OverflowException($"Transaction gas limit {gasLimit} exceeds supported range.");
+        }
+
+        return (long)gasLimit;
     }
 }

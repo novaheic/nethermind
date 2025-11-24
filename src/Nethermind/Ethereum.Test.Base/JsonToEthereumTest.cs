@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text.Json;
 using Nethermind.Config;
 using Nethermind.Core;
@@ -55,8 +56,8 @@ namespace Ethereum.Test.Base
                 new Hash256(headerJson.UncleHash),
                 new Address(headerJson.Coinbase),
                 Bytes.FromHexString(headerJson.Difficulty).ToUInt256(),
-                (long)Bytes.FromHexString(headerJson.Number).ToUInt256(),
-                (long)Bytes.FromHexString(headerJson.GasLimit).ToUnsignedBigInteger(),
+                ParseLong(headerJson.Number, "block number"),
+                ParseUlong(headerJson.GasLimit, "block gas limit"),
                 (ulong)Bytes.FromHexString(headerJson.Timestamp).ToUnsignedBigInteger(),
                 Bytes.FromHexString(headerJson.ExtraData),
                 headerJson.BlobGasUsed is null ? null : (ulong)Bytes.FromHexString(headerJson.BlobGasUsed).ToUnsignedBigInteger(),
@@ -66,7 +67,7 @@ namespace Ethereum.Test.Base
             )
             {
                 Bloom = new Bloom(Bytes.FromHexString(headerJson.Bloom)),
-                GasUsed = (long)Bytes.FromHexString(headerJson.GasUsed).ToUnsignedBigInteger(),
+                GasUsed = ParseUlong(headerJson.GasUsed, "block gas used"),
                 Hash = new Hash256(headerJson.Hash),
                 MixHash = new Hash256(headerJson.MixHash),
                 Nonce = (ulong)Bytes.FromHexString(headerJson.Nonce).ToUnsignedBigInteger(),
@@ -102,11 +103,11 @@ namespace Ethereum.Test.Base
                 {
                     BaseFeePerGas = (ulong)Bytes.FromHexString(executionPayload.BaseFeePerGas).ToUnsignedBigInteger(),
                     BlockHash = new(executionPayload.BlockHash),
-                    BlockNumber = (long)Bytes.FromHexString(executionPayload.BlockNumber).ToUnsignedBigInteger(),
+                    BlockNumber = ParseLong(executionPayload.BlockNumber, "payload block number"),
                     ExtraData = Bytes.FromHexString(executionPayload.ExtraData),
                     FeeRecipient = new(executionPayload.FeeRecipient),
-                    GasLimit = (long)Bytes.FromHexString(executionPayload.GasLimit).ToUnsignedBigInteger(),
-                    GasUsed = (long)Bytes.FromHexString(executionPayload.GasUsed).ToUnsignedBigInteger(),
+                    GasLimit = ParseLong(executionPayload.GasLimit, "payload gas limit"),
+                    GasUsed = ParseLong(executionPayload.GasUsed, "payload gas used"),
                     LogsBloom = new(Bytes.FromHexString(executionPayload.LogsBloom)),
                     ParentHash = new(executionPayload.ParentHash),
                     PrevRandao = new(executionPayload.PrevRandao),
@@ -441,6 +442,28 @@ namespace Ethereum.Test.Base
             }
 
             return testsByName;
+        }
+
+        private static ulong ParseUlong(string hex, string fieldName)
+        {
+            BigInteger value = Bytes.FromHexString(hex).ToUnsignedBigInteger();
+            if (value < BigInteger.Zero || value > ulong.MaxValue)
+            {
+                throw new InvalidDataException($"{fieldName} ({value}) exceeds supported range.");
+            }
+
+            return (ulong)value;
+        }
+
+        private static long ParseLong(string hex, string fieldName)
+        {
+            BigInteger value = Bytes.FromHexString(hex).ToUnsignedBigInteger();
+            if (value < BigInteger.Zero || value > long.MaxValue)
+            {
+                throw new InvalidDataException($"{fieldName} ({value}) exceeds supported range.");
+            }
+
+            return (long)value;
         }
 
         private static (string name, string category) GetNameAndCategory(string key)

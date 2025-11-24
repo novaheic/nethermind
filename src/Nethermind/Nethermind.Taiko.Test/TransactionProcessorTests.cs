@@ -64,13 +64,13 @@ public class TransactionProcessorTests
     [TestCaseSource(nameof(FeesDistributionTests))]
     public void Fees_distributed_correctly(byte basefeeSharingPctg, UInt256 goesToTreasury, UInt256 goesToBeneficiary, ulong gasPrice)
     {
-        long gasLimit = 100000;
+        ulong gasLimit = 100000;
         Address benefeciaryAddress = TestItem.AddressC;
 
         Transaction tx = Build.A.Transaction
             .WithValue(1)
             .WithGasPrice(gasPrice)
-            .WithGasLimit((ulong)gasLimit)
+            .WithGasLimit(gasLimit)
             .SignedAndResolved(_ethereumEcdsa, TestItem.PrivateKeyA).TestObject;
 
         var extraData = new byte[32];
@@ -79,7 +79,7 @@ public class TransactionProcessorTests
         Block block = Build.A.Block.WithNumber(1).WithTransactions(tx)
             .WithBaseFeePerGas(gasPrice)
             .WithExtraData(extraData)
-            .WithBeneficiary(benefeciaryAddress).WithGasLimit((ulong)gasLimit).TestObject;
+            .WithBeneficiary(benefeciaryAddress).WithGasLimit(gasLimit).TestObject;
 
         _transactionProcessor!.SetBlockExecutionContext(new BlockExecutionContext(block.Header, _specProvider.GetSpec(block.Header)));
         _transactionProcessor!.Execute(tx, NullTxTracer.Instance);
@@ -123,7 +123,7 @@ public class TransactionProcessorTests
     [TestCase(false)]
     public void Transaction_tip_and_base_fee_handling(bool isAnchorTx)
     {
-        long gasLimit = 21000;
+        ulong gasLimit = 21000;
         UInt256 gasPrice = 20;
         UInt256 baseFee = 5;
         UInt256 tipFee = gasPrice - baseFee;
@@ -135,7 +135,7 @@ public class TransactionProcessorTests
             .WithGasPrice(gasPrice)
             .WithMaxFeePerGas(gasPrice)
             .WithMaxPriorityFeePerGas(tipFee)
-            .WithGasLimit((ulong)gasLimit)
+            .WithGasLimit(gasLimit)
             .WithType(TxType.EIP1559)
             .SignedAndResolved(_ethereumEcdsa, TestItem.PrivateKeyA)
             .TestObject;
@@ -146,7 +146,7 @@ public class TransactionProcessorTests
             .WithTransactions(tx)
             .WithBaseFeePerGas(baseFee)
             .WithBeneficiary(beneficiaryAddress)
-            .WithGasLimit((ulong)gasLimit)
+            .WithGasLimit(gasLimit)
             .TestObject;
 
         UInt256 initialCoinbaseBalance = _stateProvider.GetBalance(beneficiaryAddress);

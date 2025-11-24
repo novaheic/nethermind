@@ -201,8 +201,8 @@ namespace Nethermind.EthStats.Integrations
                     (block.ParentHash ?? Keccak.Zero).ToString(),
                     (long)block.Timestamp,
                     (block.Author ?? block.Beneficiary ?? Address.Zero).ToString(),
-                    (long)block.GasUsed,
-                    (long)block.GasLimit,
+                    block.GasUsed,
+                    block.GasLimit,
                     block.Difficulty.ToString(),
                     (block.TotalDifficulty ?? 0).ToString(),
                     block.Transactions.Select(static t => new Transaction((t.Hash ?? Keccak.Zero).ToString())),
@@ -217,16 +217,21 @@ namespace Nethermind.EthStats.Integrations
         // ReSharper disable once UnusedMethodReturnValue.Local
         private async Task SendStatsAsync()
         {
-            UInt256 gasPrice = await _gasPriceOracle.GetGasPriceEstimate();
-            if (gasPrice > long.MaxValue)
+            UInt256 gasPriceEstimate = await _gasPriceOracle.GetGasPriceEstimate();
+            ulong gasPrice;
+            if (gasPriceEstimate > long.MaxValue)
             {
-                // EthStats doesn't work with UInt256, long should be enough
-                if (_logger.IsTrace) _logger.Trace($"Gas price beyond the eth stats expected scope {gasPrice}");
-                gasPrice = long.MaxValue;
+                // EthStats doesn't work with extremely large values, cap at long.MaxValue for compatibility.
+                if (_logger.IsTrace) _logger.Trace($"Gas price beyond the eth stats expected scope {gasPriceEstimate}");
+                gasPrice = (ulong)long.MaxValue;
+            }
+            else
+            {
+                gasPrice = (ulong)gasPriceEstimate;
             }
 
             await _sender.SendAsync(_websocketClient!, new StatsMessage(new Messages.Models.Stats(true, _ethSyncingInfo.IsSyncing(), _isMining, 0,
-                _peerManager.ActivePeers.Count, (long)gasPrice, 100)));
+                _peerManager.ActivePeers.Count, gasPrice, 100)));
         }
     }
 }

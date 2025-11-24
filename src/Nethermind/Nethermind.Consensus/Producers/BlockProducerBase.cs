@@ -243,7 +243,7 @@ namespace Nethermind.Consensus.Producers
 
             IEnumerable<Transaction> transactions = (flags & IBlockProducer.Flags.EmptyBlock) != 0 ?
                 Array.Empty<Transaction>() :
-                TxSource.GetTransactions(parent, (long)header.GasLimit, payloadAttributes, filterSource: true);
+                TxSource.GetTransactions(parent, header.GasLimit, payloadAttributes, filterSource: true);
 
             return new BlockToProduce(header, transactions, Array.Empty<BlockHeader>(), payloadAttributes?.Withdrawals);
         }

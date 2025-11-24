@@ -115,8 +115,8 @@ public class ExecutionPayload : IForkValidator, IExecutionPayloadParams, IExecut
             FeeRecipient = block.Beneficiary!,
             StateRoot = block.StateRoot!,
             BlockNumber = block.Number,
-            GasLimit = (long)block.GasLimit,
-            GasUsed = (long)block.GasUsed,
+            GasLimit = ToSignedGas(block.GasLimit, "block gas limit"),
+            GasUsed = ToSignedGas(block.GasUsed, "block gas used"),
             ReceiptsRoot = block.ReceiptsRoot!,
             LogsBloom = block.Bloom!,
             PrevRandao = block.MixHash ?? Keccak.Zero,
@@ -143,13 +143,16 @@ public class ExecutionPayload : IForkValidator, IExecutionPayloadParams, IExecut
             return new BlockDecodingResult(transactions.Error);
         }
 
+        ulong payloadGasLimit = ToUnsignedGas(GasLimit, "payload gas limit");
+        ulong payloadGasUsed = ToUnsignedGas(GasUsed, "payload gas used");
+
         BlockHeader header = new(
             ParentHash,
             Keccak.OfAnEmptySequenceRlp,
             FeeRecipient,
             UInt256.Zero,
             BlockNumber,
-            (ulong)GasLimit,
+            payloadGasLimit,
             Timestamp,
             ExtraData)
         {
@@ -157,7 +160,7 @@ public class ExecutionPayload : IForkValidator, IExecutionPayloadParams, IExecut
             ReceiptsRoot = ReceiptsRoot,
             StateRoot = StateRoot,
             Bloom = LogsBloom,
-            GasUsed = (ulong)GasUsed,
+            GasUsed = payloadGasUsed,
             BaseFeePerGas = BaseFeePerGas,
             Nonce = 0,
             MixHash = PrevRandao,
@@ -258,6 +261,26 @@ public class ExecutionPayload : IForkValidator, IExecutionPayloadParams, IExecut
 
     public virtual bool ValidateFork(ISpecProvider specProvider) =>
         !specProvider.GetSpec(BlockNumber, Timestamp).IsEip4844Enabled;
+
+    protected static long ToSignedGas(ulong gas, string source)
+    {
+        if (gas > long.MaxValue)
+        {
+            throw new OverflowException($"{source} ({gas}) exceeds supported range.");
+        }
+
+        return (long)gas;
+    }
+
+    protected static ulong ToUnsignedGas(long gas, string source)
+    {
+        if (gas < 0)
+        {
+            throw new InvalidOperationException($"{source} ({gas}) cannot be negative.");
+        }
+
+        return (ulong)gas;
+    }
 }
 
 public struct TransactionDecodingResult

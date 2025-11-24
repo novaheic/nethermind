@@ -11,7 +11,7 @@ namespace Ethereum.Test.Base
         public TxType Type { get; set; }
         public Address Sender { get; set; }
         public byte[][]? Data { get; set; }
-        public long[]? GasLimit { get; set; }
+        public ulong[]? GasLimit { get; set; }
         public UInt256? GasPrice { get; set; }
         public UInt256? MaxFeePerGas { get; set; }
         public UInt256? MaxPriorityFeePerGas { get; set; }

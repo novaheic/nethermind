@@ -43,7 +43,7 @@ public class GethLikeBlockJavaScriptTracer(IWorldState worldState, IReleaseSpec 
         _ctx.GasPrice = tx!.CalculateEffectiveGasPrice(spec.IsEip1559Enabled, _baseFee);
         _ctx.TxHash = tx.Hash;
         _ctx.txIndex = tx.Hash is not null ? _index++ : null;
-        _ctx.gas = (long)tx.GasLimit;
+        _ctx.gas = ToSignedGas(tx.GasLimit);
         _ctx.type = "CALL";
         _ctx.From = tx.SenderAddress;
         _ctx.To = tx.To;
@@ -64,5 +64,15 @@ public class GethLikeBlockJavaScriptTracer(IWorldState worldState, IReleaseSpec 
     {
         List<IDisposable>? list = Interlocked.Exchange(ref _engines, null);
         list?.ForEach(static e => e.Dispose());
+    }
+
+    private static long ToSignedGas(ulong gasLimit)
+    {
+        if (gasLimit > long.MaxValue)
+        {
+            throw new OverflowException($"Transaction gas limit {gasLimit} exceeds supported range.");
+        }
+
+        return (long)gasLimit;
     }
 }

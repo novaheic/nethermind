@@ -255,7 +255,8 @@ namespace Nethermind.Evm.TransactionProcessing
 
         protected virtual TransactionResult CalculateAvailableGas(Transaction tx, IntrinsicGas intrinsicGas, out long gasAvailable)
         {
-            gasAvailable = (long)tx.GasLimit - intrinsicGas.Standard;
+            long txGasLimit = ToSignedGas(tx.GasLimit, "transaction gas limit");
+            gasAvailable = txGasLimit - intrinsicGas.Standard;
             return TransactionResult.Ok;
         }
 
@@ -645,7 +646,8 @@ namespace Nethermind.Evm.TransactionProcessing
             where TTracingInst : struct, IFlag
         {
             substate = default;
-            gasConsumed = (long)tx.GasLimit;
+            long txGasLimit = ToSignedGas(tx.GasLimit, "transaction gas limit");
+            gasConsumed = txGasLimit;
             byte statusCode = StatusCode.Failure;
 
             Snapshot snapshot = WorldState.TakeSnapshot();
@@ -670,7 +672,7 @@ namespace Nethermind.Evm.TransactionProcessing
                 gasConsumed = gas.MinimalGas;
                 // If noValidation we didn't charge for gas, so do not refund; otherwise return unspent gas
                 if (!opts.HasFlag(ExecutionOptions.SkipValidation))
-                    WorldState.AddToBalance(tx.SenderAddress!, (ulong)((long)tx.GasLimit - gas.MinimalGas) * VirtualMachine.TxExecutionContext.GasPrice, spec);
+                    WorldState.AddToBalance(tx.SenderAddress!, (ulong)(txGasLimit - gas.MinimalGas) * VirtualMachine.TxExecutionContext.GasPrice, spec);
                 goto Complete;
             }
 
@@ -743,10 +745,8 @@ namespace Nethermind.Evm.TransactionProcessing
             return statusCode;
         }
 
-        protected virtual GasConsumed RefundOnFailContractCreation(Transaction tx, BlockHeader header, IReleaseSpec spec, ExecutionOptions opts)
-        {
-            return (long)tx.GasLimit;
-        }
+        protected virtual GasConsumed RefundOnFailContractCreation(Transaction tx, BlockHeader header, IReleaseSpec spec, ExecutionOptions opts) =>
+            ToSignedGas(tx.GasLimit, "transaction gas limit");
 
         protected virtual bool DeployLegacyContract(IReleaseSpec spec, Address codeOwner, in TransactionSubstate substate, in StackAccessTracker accessedItems, ref long unspentGas)
         {
@@ -884,7 +884,8 @@ namespace Nethermind.Evm.TransactionProcessing
         protected virtual GasConsumed Refund(Transaction tx, BlockHeader header, IReleaseSpec spec, ExecutionOptions opts,
             in TransactionSubstate substate, in long unspentGas, in UInt256 gasPrice, int codeInsertRefunds, long floorGas)
         {
-            long spentGas = (long)tx.GasLimit;
+            long txGasLimit = ToSignedGas(tx.GasLimit, "transaction gas limit");
+            long spentGas = txGasLimit;
             var codeInsertRefund = (GasCostOf.NewAccount - GasCostOf.PerAuthBaseCost) * codeInsertRefunds;
 
             if (!substate.IsError)
@@ -914,13 +915,23 @@ namespace Nethermind.Evm.TransactionProcessing
 
             // If noValidation we didn't charge for gas, so do not refund
             if (!opts.HasFlag(ExecutionOptions.SkipValidation))
-                WorldState.AddToBalance(tx.SenderAddress!, (ulong)((long)tx.GasLimit - spentGas) * gasPrice, spec);
+                WorldState.AddToBalance(tx.SenderAddress!, (ulong)(txGasLimit - spentGas) * gasPrice, spec);
 
             return new GasConsumed(spentGas, operationGas);
         }
 
         protected virtual long CalculateClaimableRefund(long spentGas, long totalRefund, IReleaseSpec spec)
             => RefundHelper.CalculateClaimableRefund(spentGas, totalRefund, spec);
+
+        protected static long ToSignedGas(ulong gasLimit, string source)
+        {
+            if (gasLimit > long.MaxValue)
+            {
+                throw new OverflowException($"{source} ({gasLimit}) exceeds supported range.");
+            }
+
+            return (long)gasLimit;
+        }
 
         [DoesNotReturn, StackTraceHidden]
         private static void ThrowInvalidDataException(string message) => throw new InvalidDataException(message);

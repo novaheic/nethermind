@@ -14,7 +14,7 @@ public class TaikoPayloadAttributes : PayloadAttributes
     public BlockMetadata? BlockMetadata { get; set; }
     public L1Origin? L1Origin { get; set; }
 
-    public override long? GetGasLimit()
+    public override ulong? GetGasLimit()
     {
         return BlockMetadata!.GasLimit;
     }

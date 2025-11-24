@@ -190,8 +190,10 @@ namespace Nethermind.Consensus.Processing
             Metrics.Transactions += txs.Length;
             Metrics.TotalDifficulty = block.TotalDifficulty ?? UInt256.Zero;
             Metrics.LastDifficulty = block.Difficulty;
-            Metrics.GasUsed = (long)block.GasUsed;
-            Metrics.GasLimit = (long)block.GasLimit;
+            long blockGasUsed = ToSignedGas(block.GasUsed, "block gas used");
+            long blockGasLimit = ToSignedGas(block.GasLimit, "block gas limit");
+            Metrics.GasUsed = blockGasUsed;
+            Metrics.GasLimit = blockGasLimit;
 
             long chunkOpCodes = (_opCodes += data.CurrentOpCodes - data.StartOpCodes);
             long chunkCalls = (_callOps += data.CurrentCallOps - data.StartCallOps);
@@ -308,7 +310,7 @@ namespace Nethermind.Consensus.Processing
                 MedianGas = Math.Max(Evm.Metrics.BlockMinGasPrice, Evm.Metrics.BlockEstMedianGasPrice),
                 AveGas = Evm.Metrics.BlockAveGasPrice,
                 MaxGas = Evm.Metrics.BlockMaxGasPrice,
-                GasLimit = (long)block.GasLimit
+                GasLimit = blockGasLimit
             });
 
             _lastElapsedRunningMicroseconds = data.RunningMicroseconds;
@@ -441,6 +443,16 @@ namespace Nethermind.Consensus.Processing
 
                 return true;
             }
+        }
+
+        private static long ToSignedGas(ulong gas, string source)
+        {
+            if (gas > long.MaxValue)
+            {
+                throw new OverflowException($"{source} ({gas}) exceeds supported range.");
+            }
+
+            return (long)gas;
         }
 
         private class BlockData

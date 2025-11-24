@@ -118,7 +118,7 @@ public class SimulateBridgeHelper(IBlocksConfig blocksConfig, ISpecProvider spec
                 nonceCache.Clear();
 
                 (BlockHeader callHeader, IReleaseSpec spec) = GetCallHeader(env.SpecProvider, blockCall, parent, payload.Validation);
-                env.SimulateRequestState.BlockGasLeft = (long)callHeader.GasLimit;
+                env.SimulateRequestState.BlockGasLeft = ToSignedGas(callHeader.GasLimit, "block gas limit");
                 callHeader.Hash = callHeader.CalculateHash();
 
                 TransactionWithSourceDetails[] calls = blockCall.Calls ?? [];
@@ -299,5 +299,15 @@ public class SimulateBridgeHelper(IBlocksConfig blocksConfig, ISpecProvider spec
         block.BlockOverrides?.ApplyOverrides(result);
 
         return (result, spec);
+    }
+
+    private static long ToSignedGas(ulong gas, string source)
+    {
+        if (gas > long.MaxValue)
+        {
+            throw new OverflowException($"{source} ({gas}) exceeds supported range.");
+        }
+
+        return (long)gas;
     }
 }

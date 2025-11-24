@@ -125,9 +125,11 @@ public sealed class NewPayloadHandler : IAsyncHandler<ExecutionPayload, PayloadS
         string requestStr = $"New Block:  {request}";
         if (_logger.IsInfo)
         {
-            _logger.Info($"Received {requestStr}      | limit {block.Header.GasLimit,13:N0} {GetGasChange(block.Number == _lastBlockNumber + 1 ? (long)block.Header.GasLimit : _lastBlockGasLimit)} | {block.ParsedExtraData()}");
+            long currentGasLimit = ToSignedGas(block.Header.GasLimit, "block gas limit");
+            long changeBasis = block.Number == _lastBlockNumber + 1 ? currentGasLimit : _lastBlockGasLimit;
+            _logger.Info($"Received {requestStr}      | limit {currentGasLimit,13:N0} {GetGasChange(changeBasis)} | {block.ParsedExtraData()}");
             _lastBlockNumber = block.Number;
-            _lastBlockGasLimit = (long)block.Header.GasLimit;
+            _lastBlockGasLimit = currentGasLimit;
         }
 
         if (!HeaderValidator.ValidateHash(block!.Header, out Hash256 actualHash))
@@ -504,5 +506,15 @@ public sealed class NewPayloadHandler : IAsyncHandler<ExecutionPayload, PayloadS
         Invalid,
         Valid,
         Syncing
+    }
+
+    private static long ToSignedGas(ulong gas, string source)
+    {
+        if (gas > long.MaxValue)
+        {
+            throw new OverflowException($"{source} ({gas}) exceeds supported range.");
+        }
+
+        return (long)gas;
     }
 }

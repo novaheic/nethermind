@@ -61,13 +61,13 @@ namespace Nethermind.Evm.Test
                 .Call(contractAddress, 100000)
                 .Op(Instruction.STOP).Done;
 
-            long gasLimit = 1000000;
+            ulong gasLimit = 1000000;
 
             EthereumEcdsa ecdsa = new(1);
-            Transaction initTx = Build.A.Transaction.WithCode(initByteCode).WithGasLimit((ulong)gasLimit).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
-            Transaction tx1 = Build.A.Transaction.WithCode(byteCode1).WithGasLimit((ulong)gasLimit).WithNonce(1).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
-            Transaction tx2 = Build.A.Transaction.WithCode(byteCode2).WithGasLimit((ulong)gasLimit).WithNonce(2).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
-            Block block = Build.A.Block.WithNumber(MainnetSpecProvider.MuirGlacierBlockNumber).WithTransactions(initTx, tx1, tx2).WithGasLimit((ulong)(2 * gasLimit)).TestObject;
+            Transaction initTx = Build.A.Transaction.WithCode(initByteCode).WithGasLimit(gasLimit).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
+            Transaction tx1 = Build.A.Transaction.WithCode(byteCode1).WithGasLimit(gasLimit).WithNonce(1).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
+            Transaction tx2 = Build.A.Transaction.WithCode(byteCode2).WithGasLimit(gasLimit).WithNonce(2).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
+            Block block = Build.A.Block.WithNumber(MainnetSpecProvider.MuirGlacierBlockNumber).WithTransactions(initTx, tx1, tx2).WithGasLimit(2 * gasLimit).TestObject;
 
             ParityLikeTxTracer initTracer = new(block, initTx, ParityTraceTypes.Trace | ParityTraceTypes.StateDiff);
             var blCtx = new BlockExecutionContext(block.Header, Spec);
@@ -141,22 +141,22 @@ namespace Nethermind.Evm.Test
                 .Call(deploymentAddress, 100000)
                 .Op(Instruction.STOP).Done;
 
-            long gasLimit = 1000000;
+            ulong gasLimit = 1000000;
 
             EthereumEcdsa ecdsa = new(1);
             // deploy create 2
-            Transaction tx0 = Build.A.Transaction.WithCode(initOfCreate2Code).WithGasLimit((ulong)gasLimit).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
+            Transaction tx0 = Build.A.Transaction.WithCode(initOfCreate2Code).WithGasLimit(gasLimit).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
             // invoke create 2 to deploy contract
-            Transaction tx1 = Build.A.Transaction.WithCode(deploy).WithGasLimit((ulong)gasLimit).WithNonce(1).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
+            Transaction tx1 = Build.A.Transaction.WithCode(deploy).WithGasLimit(gasLimit).WithNonce(1).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
             // call contract once
-            Transaction tx2 = Build.A.Transaction.WithCode(byteCode1).WithGasLimit((ulong)gasLimit).WithNonce(2).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
+            Transaction tx2 = Build.A.Transaction.WithCode(byteCode1).WithGasLimit(gasLimit).WithNonce(2).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
             // self destruct contract
-            Transaction tx3 = Build.A.Transaction.WithCode(byteCode2).WithGasLimit((ulong)gasLimit).WithNonce(3).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
+            Transaction tx3 = Build.A.Transaction.WithCode(byteCode2).WithGasLimit(gasLimit).WithNonce(3).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
             // deploy again using create2
-            Transaction tx4 = Build.A.Transaction.WithCode(deploy).WithGasLimit((ulong)gasLimit).WithNonce(4).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
+            Transaction tx4 = Build.A.Transaction.WithCode(deploy).WithGasLimit(gasLimit).WithNonce(4).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
             // call newly deployed once
-            Transaction tx5 = Build.A.Transaction.WithCode(byteCode1).WithGasLimit((ulong)gasLimit).WithNonce(5).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
-            Block block = Build.A.Block.WithNumber(MainnetSpecProvider.MuirGlacierBlockNumber).WithTransactions(tx0, tx1, tx2, tx3, tx4, tx5).WithGasLimit((ulong)(2 * gasLimit)).TestObject;
+            Transaction tx5 = Build.A.Transaction.WithCode(byteCode1).WithGasLimit(gasLimit).WithNonce(5).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
+            Block block = Build.A.Block.WithNumber(MainnetSpecProvider.MuirGlacierBlockNumber).WithTransactions(tx0, tx1, tx2, tx3, tx4, tx5).WithGasLimit(2 * gasLimit).TestObject;
 
             ParityLikeTxTracer tracer0 = new(block, tx0, ParityTraceTypes.Trace | ParityTraceTypes.StateDiff);
             var blCtx = new BlockExecutionContext(block.Header, Spec);
@@ -247,22 +247,22 @@ namespace Nethermind.Evm.Test
                 .CallWithValue(deploymentAddress, 100000)
                 .Op(Instruction.STOP).Done;
 
-            long gasLimit = 1000000;
+            ulong gasLimit = 1000000;
 
             EthereumEcdsa ecdsa = new(1);
             // deploy create 2
-            Transaction tx0 = Build.A.Transaction.WithCode(initOfCreate2Code).WithGasLimit((ulong)gasLimit).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
+            Transaction tx0 = Build.A.Transaction.WithCode(initOfCreate2Code).WithGasLimit(gasLimit).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
             // invoke create 2 to deploy contract
-            Transaction tx1 = Build.A.Transaction.WithValue(2).WithCode(deploy).WithGasLimit((ulong)gasLimit).WithNonce(1).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
+            Transaction tx1 = Build.A.Transaction.WithValue(2).WithCode(deploy).WithGasLimit(gasLimit).WithNonce(1).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
             // call contract once
-            Transaction tx2 = Build.A.Transaction.WithCode(byteCode1).WithGasLimit((ulong)gasLimit).WithNonce(2).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
+            Transaction tx2 = Build.A.Transaction.WithCode(byteCode1).WithGasLimit(gasLimit).WithNonce(2).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
             // self destruct contract
-            Transaction tx3 = Build.A.Transaction.WithCode(byteCode2).WithGasLimit((ulong)gasLimit).WithNonce(3).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
+            Transaction tx3 = Build.A.Transaction.WithCode(byteCode2).WithGasLimit(gasLimit).WithNonce(3).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
             // deploy again using create2
-            Transaction tx4 = Build.A.Transaction.WithValue(3).WithCode(deploy).WithGasLimit((ulong)gasLimit).WithNonce(4).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
+            Transaction tx4 = Build.A.Transaction.WithValue(3).WithCode(deploy).WithGasLimit(gasLimit).WithNonce(4).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
             // call newly deployed once
-            Transaction tx5 = Build.A.Transaction.WithCode(byteCode1).WithGasLimit((ulong)gasLimit).WithNonce(5).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
-            Block block = Build.A.Block.WithNumber(MainnetSpecProvider.MuirGlacierBlockNumber).WithTransactions(tx0, tx1, tx2, tx3, tx4, tx5).WithGasLimit((ulong)(2 * gasLimit)).TestObject;
+            Transaction tx5 = Build.A.Transaction.WithCode(byteCode1).WithGasLimit(gasLimit).WithNonce(5).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
+            Block block = Build.A.Block.WithNumber(MainnetSpecProvider.MuirGlacierBlockNumber).WithTransactions(tx0, tx1, tx2, tx3, tx4, tx5).WithGasLimit(2 * gasLimit).TestObject;
 
             ParityLikeTxTracer tracer0 = new(block, tx0, ParityTraceTypes.Trace | ParityTraceTypes.StateDiff);
             var blCtx = new BlockExecutionContext(block.Header, Spec);
@@ -365,20 +365,20 @@ namespace Nethermind.Evm.Test
             TestState.Commit(MuirGlacier.Instance);
             TestState.CommitTree(0);
 
-            long gasLimit = 1000000;
+            ulong gasLimit = 1000000;
 
             EthereumEcdsa ecdsa = new(1);
             // deploy create 2
-            Transaction tx0 = Build.A.Transaction.WithCode(initOfCreate2Code).WithGasLimit((ulong)gasLimit).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
+            Transaction tx0 = Build.A.Transaction.WithCode(initOfCreate2Code).WithGasLimit(gasLimit).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
             // call contract once
-            Transaction tx1 = Build.A.Transaction.WithCode(byteCode1).WithGasLimit((ulong)gasLimit).WithNonce(1).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
+            Transaction tx1 = Build.A.Transaction.WithCode(byteCode1).WithGasLimit(gasLimit).WithNonce(1).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
             // self destruct contract
-            Transaction tx2 = Build.A.Transaction.WithCode(byteCode2).WithGasLimit((ulong)gasLimit).WithNonce(2).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
+            Transaction tx2 = Build.A.Transaction.WithCode(byteCode2).WithGasLimit(gasLimit).WithNonce(2).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
             // deploy again using create2
-            Transaction tx3 = Build.A.Transaction.WithValue(3).WithCode(deploy).WithGasLimit((ulong)gasLimit).WithNonce(3).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
+            Transaction tx3 = Build.A.Transaction.WithValue(3).WithCode(deploy).WithGasLimit(gasLimit).WithNonce(3).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
             // call newly deployed once
-            Transaction tx4 = Build.A.Transaction.WithCode(byteCode1).WithGasLimit((ulong)gasLimit).WithNonce(4).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
-            Block block = Build.A.Block.WithNumber(MainnetSpecProvider.MuirGlacierBlockNumber).WithTransactions(tx0, tx1, tx2, tx3, tx4).WithGasLimit((ulong)(2 * gasLimit)).TestObject;
+            Transaction tx4 = Build.A.Transaction.WithCode(byteCode1).WithGasLimit(gasLimit).WithNonce(4).SignedAndResolved(ecdsa, TestItem.PrivateKeyA).TestObject;
+            Block block = Build.A.Block.WithNumber(MainnetSpecProvider.MuirGlacierBlockNumber).WithTransactions(tx0, tx1, tx2, tx3, tx4).WithGasLimit(2 * gasLimit).TestObject;
 
             ParityLikeTxTracer tracer = new(block, tx0, ParityTraceTypes.Trace | ParityTraceTypes.StateDiff);
             var blCtx = new BlockExecutionContext(block.Header, Spec);

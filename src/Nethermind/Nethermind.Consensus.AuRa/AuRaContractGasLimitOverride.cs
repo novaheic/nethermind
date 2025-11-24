@@ -46,11 +46,11 @@ namespace Nethermind.Consensus.AuRa
             _logger = logManager?.GetClassLogger<AuRaContractGasLimitOverride>() ?? throw new ArgumentNullException(nameof(logManager));
         }
 
-        public long GetGasLimit(BlockHeader parentHeader) => GetGasLimitFromContract(parentHeader) ?? _innerCalculator.GetGasLimit(parentHeader);
+        public ulong GetGasLimit(BlockHeader parentHeader) => GetGasLimitFromContract(parentHeader) ?? _innerCalculator.GetGasLimit(parentHeader);
 
-        private long? GetGasLimitFromContract(BlockHeader parentHeader)
+        private ulong? GetGasLimitFromContract(BlockHeader parentHeader)
         {
-            if (_cache.GasLimitCache.TryGet(parentHeader.Hash, out long? gasLimit))
+            if (_cache.GasLimitCache.TryGet(parentHeader.Hash, out ulong? gasLimit))
             {
                 return gasLimit;
             }
@@ -58,11 +58,11 @@ namespace Nethermind.Consensus.AuRa
             if (_contracts.TryGetForBlock(parentHeader.Number + 1, out IBlockGasLimitContract contract))
             {
                 UInt256? contractLimit = GetContractGasLimit(parentHeader, contract);
-                gasLimit = contractLimit.HasValue ? (long)contractLimit.Value : (long?)null;
+                gasLimit = contractLimit.HasValue ? (ulong)contractLimit.Value : (ulong?)null;
                 _cache.GasLimitCache.Set(parentHeader.Hash, gasLimit);
                 if (gasLimit.HasValue)
                 {
-                    if (gasLimit.Value != (long)parentHeader.GasLimit)
+                    if (gasLimit.Value != parentHeader.GasLimit)
                     {
                         if (_logger.IsInfo)
                             _logger.Info($"Block gas limit was changed from {parentHeader.GasLimit} to {gasLimit.Value}.");
@@ -98,10 +98,10 @@ namespace Nethermind.Consensus.AuRa
         {
             private const int MaxCacheSize = 10;
 
-            internal LruCache<ValueHash256, long?> GasLimitCache { get; } = new(MaxCacheSize, "BlockGasLimit");
+            internal LruCache<ValueHash256, ulong?> GasLimitCache { get; } = new(MaxCacheSize, "BlockGasLimit");
         }
 
-        public bool IsGasLimitValid(BlockHeader parentHeader, in long gasLimit, out long? expectedGasLimit)
+        public bool IsGasLimitValid(BlockHeader parentHeader, in ulong gasLimit, out ulong? expectedGasLimit)
         {
             expectedGasLimit = GetGasLimitFromContract(parentHeader);
             return expectedGasLimit is null || expectedGasLimit == gasLimit;
