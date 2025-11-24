@@ -177,7 +177,7 @@ public class EvmPooledMemoryTests : EvmMemoryTestsBase
         Transaction tx = Build.A.Transaction.
             WithData(input).
             WithTo(to).
-            WithGasLimit(gas).
+            WithGasLimit((ulong)gas).
             WithGasPrice(0).
             WithValue(0).
             SignedAndResolved(ethereumEcdsa, PrivateKeyD, true).
@@ -187,7 +187,7 @@ public class EvmPooledMemoryTests : EvmMemoryTestsBase
             WithNumber(blocknr + 1).
             WithTimestamp(ts).
             WithTransactions(tx).
-            WithGasLimit(30000000).
+            WithGasLimit(30000000ul).
             WithDifficulty(0).
             WithStateRoot(stateRoot).
             TestObject;

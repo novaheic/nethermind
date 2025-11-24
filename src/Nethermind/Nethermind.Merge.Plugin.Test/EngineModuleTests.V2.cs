@@ -600,7 +600,7 @@ public partial class EngineModuleTests
             BlockNumber = 1,
             ExtraData = Bytes.FromHexString("0x4e65746865726d696e64"), // Nethermind
             FeeRecipient = feeRecipient,
-            GasLimit = chain.BlockTree.Head!.GasLimit,
+            GasLimit = (long)chain.BlockTree.Head!.GasLimit,
             GasUsed = 0,
             LogsBloom = Bloom.Empty,
             ParentHash = startingHead,

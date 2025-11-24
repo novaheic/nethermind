@@ -83,9 +83,9 @@ namespace Nethermind.AuRa.Test
             int gasLimit = 10000000;
             BlockHeader header = Build.A.BlockHeader.WithAuthor(TestItem.AddressD).WithNumber(3).TestObject;
             Transaction tx = Nethermind.Core.Test.Builders.Build.A.Transaction.WithData(new byte[] { 0, 1 })
-                .SignedAndResolved().WithChainId(105).WithGasPrice(0).WithValue(0).WithGasLimit(gasLimit + 1).TestObject;
+                .SignedAndResolved().WithChainId(105).WithGasPrice(0).WithValue(0).WithGasLimit((ulong)(gasLimit + 1)).TestObject;
             Block block = Build.A.Block.WithHeader(header).WithTransactions(new Transaction[] { tx })
-                .WithGasLimit(gasLimit).TestObject;
+                .WithGasLimit((ulong)gasLimit).TestObject;
             Assert.DoesNotThrow(() => processor.Process(
                 null,
                 new List<Block> { block },

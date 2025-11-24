@@ -142,7 +142,7 @@ public class TaikoEngineRpcModule(IAsyncHandler<byte[], ExecutionPayload?> getPa
                 beneficiary,
                 UInt256.Zero,
                 head!.Number + 1,
-                (long)blockMaxGasLimit,
+                (ulong)blockMaxGasLimit,
                 head.Timestamp + 1,
                 [])
         {

@@ -209,7 +209,7 @@ public class CliqueBlockProducerTests
             extraDataHex += "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
 
             byte[] extraData = Bytes.FromHexString(extraDataHex);
-            BlockHeader header = new(parentHash, unclesHash, beneficiary, difficulty, number, gasLimit, timestamp, extraData);
+            BlockHeader header = new(parentHash, unclesHash, beneficiary, difficulty, number, (ulong)gasLimit, timestamp, extraData);
             Block genesis = new(header);
             genesis.Header.Hash = genesis.Header.CalculateHash();
             genesis.Header.StateRoot = new Hash256("0xba946bf2140ef68f7d9d57ef06a8ac0b28002b62060c462ba398389c97f1f1fa");

@@ -153,7 +153,7 @@ namespace Nethermind.JsonRpc.Modules.Eth
             {
                 if (_rpcConfig.GasCap is not null)
                 {
-                    tx.GasLimit = long.Min(tx.GasLimit, _rpcConfig.GasCap.Value);
+                    tx.GasLimit = (ulong)long.Min((long)tx.GasLimit, _rpcConfig.GasCap.Value);
                 }
 
                 CallOutput result = _blockchainBridge.Call(header, tx, stateOverride, token);

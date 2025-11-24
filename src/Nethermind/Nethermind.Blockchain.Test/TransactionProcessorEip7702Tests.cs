@@ -255,7 +255,7 @@ internal class TransactionProcessorEip7702Tests
         Transaction tx = Build.A.Transaction
             .WithType(TxType.SetCode)
             .WithTo(signer.Address)
-            .WithGasLimit(GasCostOf.Transaction + GasCostOf.NewAccount * count)
+            .WithGasLimit((ulong)(GasCostOf.Transaction + GasCostOf.NewAccount * count))
             .WithAuthorizationCode(Enumerable.Range(0, count)
                                              .Select(i => _ethereumEcdsa.Sign(
                                                  signer,
@@ -803,7 +803,7 @@ internal class TransactionProcessorEip7702Tests
         Transaction tx = Build.A.Transaction
             .WithType(TxType.EIP1559)
             .WithTo(codeSource)
-            .WithGasLimit(gasLimit)
+            .WithGasLimit((ulong)gasLimit)
             .SignedAndResolved(_ethereumEcdsa, sender, true)
             .TestObject;
         Block block = Build.A.Block.WithNumber(long.MaxValue)

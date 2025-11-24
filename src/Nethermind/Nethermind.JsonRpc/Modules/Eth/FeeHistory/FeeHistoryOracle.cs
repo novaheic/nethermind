@@ -129,7 +129,7 @@ namespace Nethermind.JsonRpc.Modules.Eth.FeeHistory
                     b.GasUsed / (double)b.GasLimit,
                     blobGasUsedRatio,
                     b.ParentHash,
-                    b.GasUsed,
+                    (long)b.GasUsed,
                     b.Transactions.Length,
                     GetRewardsInBlock(b));
             }
@@ -246,11 +246,11 @@ namespace Nethermind.JsonRpc.Modules.Eth.FeeHistory
         {
             static IEnumerable<long> CalculateGasUsed(TxReceipt[] txReceipts)
             {
-                long previousGasUsedTotal = 0;
+                ulong previousGasUsedTotal = 0;
                 foreach (TxReceipt receipt in txReceipts)
                 {
-                    long gasUsedTotal = receipt.GasUsedTotal;
-                    yield return gasUsedTotal - previousGasUsedTotal;
+                    ulong gasUsedTotal = receipt.GasUsedTotal;
+                    yield return (long)(gasUsedTotal - previousGasUsedTotal);
                     previousGasUsedTotal = gasUsedTotal;
                 }
             }
@@ -261,7 +261,7 @@ namespace Nethermind.JsonRpc.Modules.Eth.FeeHistory
                 ? CalculateGasUsed(receipts)
                 // If no receipts available, approximate on GasLimit
                 // We could just go with null here too and just don't return percentiles
-                : txs.Select(static tx => tx.GasLimit));
+                : txs.Select(static tx => (long)tx.GasLimit));
 
             List<RewardInfo> rewardInfos = new(txs.Length);
             Span<long> gasUsedSpan = gasUsed.AsSpan();
@@ -287,7 +287,7 @@ namespace Nethermind.JsonRpc.Modules.Eth.FeeHistory
 
             foreach (var percentile in rewardPercentiles)
             {
-                double thresholdGasUsed = (ulong)(blockInfo.GasUsed * percentile / 100);
+                double thresholdGasUsed = (long)(blockInfo.GasUsed * percentile / 100);
                 while (txIndex < rewardsInBlock.Count && sumGasUsed < thresholdGasUsed)
                 {
                     txIndex++;

@@ -18,20 +18,20 @@ public class SimulateTransactionProcessorAdapter(ITransactionProcessor transacti
         // The gas limit per tx go down as the block is processed.
         if (!simulateRequestState.TxsWithExplicitGas[_currentTxIndex])
         {
-            transaction.GasLimit = long.Min(simulateRequestState.BlockGasLeft, simulateRequestState.TotalGasLeft);
+            transaction.GasLimit = (ulong)long.Min(simulateRequestState.BlockGasLeft, simulateRequestState.TotalGasLeft);
         }
 
-        if (simulateRequestState.TotalGasLeft < transaction.GasLimit)
+        if (simulateRequestState.TotalGasLeft < (long)transaction.GasLimit)
         {
-            transaction.GasLimit = simulateRequestState.TotalGasLeft;
+            transaction.GasLimit = (ulong)simulateRequestState.TotalGasLeft;
         }
         transaction.Hash = transaction.CalculateHash();
 
         TransactionResult result = simulateRequestState.Validate ? transactionProcessor.Execute(transaction, txTracer) : transactionProcessor.Trace(transaction, txTracer);
 
         // Keep track of gas left
-        simulateRequestState.TotalGasLeft -= transaction.SpentGas;
-        simulateRequestState.BlockGasLeft -= transaction.SpentGas;
+        simulateRequestState.TotalGasLeft -= (long)transaction.SpentGas;
+        simulateRequestState.BlockGasLeft -= (long)transaction.SpentGas;
 
         _currentTxIndex++;
         return result;

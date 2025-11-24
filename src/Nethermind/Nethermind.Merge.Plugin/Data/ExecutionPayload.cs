@@ -115,8 +115,8 @@ public class ExecutionPayload : IForkValidator, IExecutionPayloadParams, IExecut
             FeeRecipient = block.Beneficiary!,
             StateRoot = block.StateRoot!,
             BlockNumber = block.Number,
-            GasLimit = block.GasLimit,
-            GasUsed = block.GasUsed,
+            GasLimit = (long)block.GasLimit,
+            GasUsed = (long)block.GasUsed,
             ReceiptsRoot = block.ReceiptsRoot!,
             LogsBloom = block.Bloom!,
             PrevRandao = block.MixHash ?? Keccak.Zero,
@@ -149,7 +149,7 @@ public class ExecutionPayload : IForkValidator, IExecutionPayloadParams, IExecut
             FeeRecipient,
             UInt256.Zero,
             BlockNumber,
-            GasLimit,
+            (ulong)GasLimit,
             Timestamp,
             ExtraData)
         {
@@ -157,7 +157,7 @@ public class ExecutionPayload : IForkValidator, IExecutionPayloadParams, IExecut
             ReceiptsRoot = ReceiptsRoot,
             StateRoot = StateRoot,
             Bloom = LogsBloom,
-            GasUsed = GasUsed,
+            GasUsed = (ulong)GasUsed,
             BaseFeePerGas = BaseFeePerGas,
             Nonce = 0,
             MixHash = PrevRandao,

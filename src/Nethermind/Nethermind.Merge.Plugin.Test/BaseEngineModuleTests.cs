@@ -153,7 +153,7 @@ public abstract partial class BaseEngineModuleTests
             BlockHash = head.Hash!,
             StateRoot = head.StateRoot!,
             ReceiptsRoot = head.ReceiptsRoot!,
-            GasLimit = head.GasLimit,
+            GasLimit = (long)head.GasLimit,
             Timestamp = head.Timestamp,
             BaseFeePerGas = head.BaseFeePerGas,
         };

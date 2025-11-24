@@ -240,13 +240,14 @@ public class DebugBridge : IDebugBridge
                 trace = new GethLikeTxTrace
                 {
                     Failed = true,
-                    Gas = tx.GasLimit,
+                    Gas = (long)tx.GasLimit,
                     ReturnValue = []
                 };
             }
 
             if (trace is not null)
             {
+                trace.Gas = (long)tx.GasLimit;
                 yield return trace;
             }
         }

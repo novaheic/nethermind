@@ -127,8 +127,8 @@ public class LegacyTransactionForRpc : TransactionForRpc, ITxTyped, IFromTransac
             gasCap = long.MaxValue;
 
         Gas = Gas is null || Gas == 0
-            ? gasCap
-            : Math.Min(gasCap.Value, Gas.Value);
+            ? (ulong?)gasCap
+            : Math.Min((ulong)gasCap.Value, Gas.Value);
 
         From ??= Address.Zero;
     }

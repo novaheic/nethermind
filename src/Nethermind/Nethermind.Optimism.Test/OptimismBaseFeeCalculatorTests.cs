@@ -42,7 +42,7 @@ public class OptimismBaseFeeCalculatorTests
             .WithGasLimit(30_000_000)
             .WithBaseFee(10_000_000)
             .WithTimestamp(HoloceneTimestamp)
-            .WithGasUsed(gasUsed)
+            .WithGasUsed((ulong)gasUsed)
             .WithExtraData(extraData)
             .TestObject;
 

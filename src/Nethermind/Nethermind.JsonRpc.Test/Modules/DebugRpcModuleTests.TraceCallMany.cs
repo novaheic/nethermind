@@ -34,7 +34,7 @@ public partial class DebugRpcModuleTests
             From = from ?? TestItem.AddressD,
             To = to ?? TestItem.AddressC,
             Value = value ?? 1.Ether(),
-            Gas = gas
+            Gas = (ulong)gas
         };
 
     private static async Task<Context> CreateContext()

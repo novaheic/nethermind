@@ -491,7 +491,7 @@ public class E2ESyncTests(E2ESyncTests.DbMode dbMode, bool isPostMerge)
             Transaction[] txs = codes.Select((byteCode) => Build.A.Transaction
                     .WithCode(byteCode)
                     .WithNonce(currentNonce++)
-                    .WithGasLimit(gasLimit)
+                    .WithGasLimit((ulong)gasLimit)
                     .WithGasPrice(10.GWei())
                     .SignedAndResolved(ecdsa, nodeKey, spec.IsEip155Enabled).TestObject)
                 .ToArray();

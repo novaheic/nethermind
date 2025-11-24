@@ -65,11 +65,11 @@ namespace Nethermind.Evm.Test
             byte[] contractCall = Prepare.EvmCode
                 .Call(_contractAddress, 100000)
                 .Op(Instruction.STOP).Done;
-            Transaction initTx = Build.A.Transaction.WithCode(_initCode).WithValue(99.Ether()).WithGasLimit(_gasLimit).SignedAndResolved(_ecdsa, TestItem.PrivateKeyA).TestObject;
-            Transaction tx1 = Build.A.Transaction.WithCode(contractCall).WithGasLimit(_gasLimit).WithNonce(1).SignedAndResolved(_ecdsa, TestItem.PrivateKeyA).TestObject;
+            Transaction initTx = Build.A.Transaction.WithCode(_initCode).WithValue(99.Ether()).WithGasLimit((ulong)_gasLimit).SignedAndResolved(_ecdsa, TestItem.PrivateKeyA).TestObject;
+            Transaction tx1 = Build.A.Transaction.WithCode(contractCall).WithGasLimit((ulong)_gasLimit).WithNonce(1).SignedAndResolved(_ecdsa, TestItem.PrivateKeyA).TestObject;
             Block block = Build.A.Block.WithNumber(BlockNumber)
                 .WithTimestamp(timestamp)
-                .WithTransactions(initTx, tx1).WithGasLimit(2 * _gasLimit).TestObject;
+                .WithTransactions(initTx, tx1).WithGasLimit((ulong)(2 * _gasLimit)).TestObject;
             var blCtx = new BlockExecutionContext(block.Header, SpecProvider.GetSpec(block.Header));
             _processor.Execute(initTx, blCtx, NullTxTracer.Instance);
             UInt256 contractBalanceAfterInit = TestState.GetBalance(_contractAddress);
@@ -96,11 +96,11 @@ namespace Nethermind.Evm.Test
             byte[] contractCall = Prepare.EvmCode
                 .Call(_contractAddress, 100000)
                 .Op(Instruction.STOP).Done;
-            Transaction initTx = Build.A.Transaction.WithCode(_initCode).WithValue(99.Ether()).WithGasLimit(_gasLimit).SignedAndResolved(_ecdsa, TestItem.PrivateKeyA).TestObject;
-            Transaction tx1 = Build.A.Transaction.WithCode(contractCall).WithGasLimit(_gasLimit).WithNonce(1).SignedAndResolved(_ecdsa, TestItem.PrivateKeyA).TestObject;
+            Transaction initTx = Build.A.Transaction.WithCode(_initCode).WithValue(99.Ether()).WithGasLimit((ulong)_gasLimit).SignedAndResolved(_ecdsa, TestItem.PrivateKeyA).TestObject;
+            Transaction tx1 = Build.A.Transaction.WithCode(contractCall).WithGasLimit((ulong)_gasLimit).WithNonce(1).SignedAndResolved(_ecdsa, TestItem.PrivateKeyA).TestObject;
             Block block = Build.A.Block.WithNumber(BlockNumber)
                 .WithTimestamp(timestamp)
-                .WithTransactions(initTx, tx1).WithGasLimit(2 * _gasLimit).TestObject;
+                .WithTransactions(initTx, tx1).WithGasLimit((ulong)(2 * _gasLimit)).TestObject;
 
             var blCtx = new BlockExecutionContext(block.Header, SpecProvider.GetSpec(block.Header));
             _processor.Execute(initTx, blCtx, NullTxTracer.Instance);
@@ -130,10 +130,10 @@ namespace Nethermind.Evm.Test
                 .STOP()
                 .Done;
 
-            Transaction createTx = Build.A.Transaction.WithCode(tx1).WithValue(100.Ether()).WithGasLimit(_gasLimit).SignedAndResolved(_ecdsa, TestItem.PrivateKeyA).TestObject;
+            Transaction createTx = Build.A.Transaction.WithCode(tx1).WithValue(100.Ether()).WithGasLimit((ulong)_gasLimit).SignedAndResolved(_ecdsa, TestItem.PrivateKeyA).TestObject;
             Block block = Build.A.Block.WithNumber(BlockNumber)
                 .WithTimestamp(Timestamp)
-                .WithTransactions(createTx).WithGasLimit(2 * _gasLimit).TestObject;
+                .WithTransactions(createTx).WithGasLimit((ulong)(2 * _gasLimit)).TestObject;
 
             _processor.Execute(createTx, new BlockExecutionContext(block.Header, SpecProvider.GetSpec(block.Header)), NullTxTracer.Instance);
 
@@ -152,10 +152,10 @@ namespace Nethermind.Evm.Test
                 .STOP()
                 .Done;
 
-            Transaction createTx = Build.A.Transaction.WithCode(tx1).WithValue(100.Ether()).WithGasLimit(_gasLimit).SignedAndResolved(_ecdsa, TestItem.PrivateKeyA).TestObject;
+            Transaction createTx = Build.A.Transaction.WithCode(tx1).WithValue(100.Ether()).WithGasLimit((ulong)_gasLimit).SignedAndResolved(_ecdsa, TestItem.PrivateKeyA).TestObject;
             Block block = Build.A.Block.WithNumber(BlockNumber)
                 .WithTimestamp(Timestamp)
-                .WithTransactions(createTx).WithGasLimit(2 * _gasLimit).TestObject;
+                .WithTransactions(createTx).WithGasLimit((ulong)(2 * _gasLimit)).TestObject;
 
             _processor.Execute(createTx, new BlockExecutionContext(block.Header, SpecProvider.GetSpec(block.Header)), NullTxTracer.Instance);
 
@@ -166,10 +166,10 @@ namespace Nethermind.Evm.Test
         [Test]
         public void self_destruct_in_initcode_of_create_tx()
         {
-            Transaction createTx = Build.A.Transaction.WithCode(_selfDestructCode).WithValue(99.Ether()).WithGasLimit(_gasLimit).SignedAndResolved(_ecdsa, TestItem.PrivateKeyA).TestObject;
+            Transaction createTx = Build.A.Transaction.WithCode(_selfDestructCode).WithValue(99.Ether()).WithGasLimit((ulong)_gasLimit).SignedAndResolved(_ecdsa, TestItem.PrivateKeyA).TestObject;
             Block block = Build.A.Block.WithNumber(BlockNumber)
                 .WithTimestamp(Timestamp)
-                .WithTransactions(createTx).WithGasLimit(2 * _gasLimit).TestObject;
+                .WithTransactions(createTx).WithGasLimit((ulong)(2 * _gasLimit)).TestObject;
 
             _processor.Execute(createTx, new BlockExecutionContext(block.Header, SpecProvider.GetSpec(block.Header)), NullTxTracer.Instance);
 

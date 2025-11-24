@@ -41,7 +41,7 @@ public class TaikoExecutionPayload : ExecutionPayload
                 FeeRecipient,
                 UInt256.Zero,
                 BlockNumber,
-                GasLimit,
+                (ulong)GasLimit,
                 Timestamp,
                 ExtraData)
             {
@@ -49,7 +49,7 @@ public class TaikoExecutionPayload : ExecutionPayload
                 ReceiptsRoot = ReceiptsRoot,
                 StateRoot = StateRoot,
                 Bloom = LogsBloom,
-                GasUsed = GasUsed,
+                GasUsed = (ulong)GasUsed,
                 BaseFeePerGas = BaseFeePerGas,
                 Nonce = 0,
                 MixHash = PrevRandao,

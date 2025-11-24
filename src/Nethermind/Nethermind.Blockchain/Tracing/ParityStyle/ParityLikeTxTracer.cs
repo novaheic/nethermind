@@ -225,7 +225,7 @@ public class ParityLikeTxTracer : TxTracer
             To = _tx.To,
             Value = _tx.Value,
             Input = _tx.Data.AsArray(),
-            Gas = _tx.GasLimit,
+            Gas = (long)_tx.GasLimit,
             CallType = _tx.IsMessageCall ? "call" : "init",
             Error = error
         };

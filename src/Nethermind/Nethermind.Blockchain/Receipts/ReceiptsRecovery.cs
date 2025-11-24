@@ -112,13 +112,13 @@ namespace Nethermind.Blockchain.Receipts
 
                 // how would it be in CREATE2?
                 receipt.ContractAddress = transaction.IsContractCreation && transaction.SenderAddress is not null ? ContractAddress.From(receipt.Sender, transaction.Nonce) : null;
-                receipt.GasUsed = receipt.GasUsedTotal - _gasUsedBefore;
+                receipt.GasUsed = receipt.GasUsedTotal - (ulong)_gasUsedBefore;
                 if (receipt.StatusCode != StatusCode.Success)
                 {
                     receipt.StatusCode = (receipt.Logs?.Length ?? 0) == 0 ? StatusCode.Failure : StatusCode.Success;
                 }
 
-                IncrementContext(receipt.GasUsedTotal);
+                IncrementContext((long)receipt.GasUsedTotal);
             }
 
             public void RecoverReceiptData(ref TxReceiptStructRef receipt)
@@ -143,13 +143,13 @@ namespace Nethermind.Blockchain.Receipts
 
                 // how would it be in CREATE2?
                 receipt.ContractAddress = (transaction.IsContractCreation && transaction.SenderAddress is not null ? ContractAddress.From(receipt.Sender.ToAddress(), transaction.Nonce) : Address.Zero)!.ToStructRef();
-                receipt.GasUsed = receipt.GasUsedTotal - _gasUsedBefore;
+                receipt.GasUsed = receipt.GasUsedTotal - (ulong)_gasUsedBefore;
                 if (receipt.StatusCode != StatusCode.Success)
                 {
                     receipt.StatusCode = (receipt.Logs?.Length ?? 0) == 0 ? StatusCode.Failure : StatusCode.Success;
                 }
 
-                IncrementContext(receipt.GasUsedTotal);
+                IncrementContext((long)receipt.GasUsedTotal);
             }
 
             private void IncrementContext(long gasUsedTotal)

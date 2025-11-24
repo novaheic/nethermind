@@ -211,24 +211,18 @@ namespace Nethermind.Consensus.Validators
             // valid when using ulong, but wrapped to negative value when using long. However, switching to ulong
             // at this point can cause other unexpected error. So we just won't support it for now.
 
-            error = blockHeader switch
-            {
-                { Number: < 0 } => BlockErrorMessages.NegativeBlockNumber,
-                { GasLimit: < 0 } => BlockErrorMessages.NegativeGasLimit,
-                { GasUsed: < 0 } => BlockErrorMessages.NegativeGasUsed,
-                _ => null
-            };
+            error = (long)blockHeader.Number < 0 ? BlockErrorMessages.NegativeBlockNumber
+                : (long)blockHeader.GasLimit < 0 ? BlockErrorMessages.NegativeGasLimit
+                : (long)blockHeader.GasUsed < 0 ? BlockErrorMessages.NegativeGasUsed
+                : null;
 
             if (error is null) return true;
 
             if (_logger.IsWarn)
-                _logger.Warn($"Invalid block header ({blockHeader.Hash}) - {blockHeader switch
-                {
-                    { Number: < 0 } => $"Block number is negative {blockHeader.Number}",
-                    { GasLimit: < 0 } => $"Block GasLimit is negative {blockHeader.GasLimit}",
-                    { GasUsed: < 0 } => $"Block GasUsed is negative {blockHeader.GasUsed}",
-                    _ => error
-                }}");
+                _logger.Warn($"Invalid block header ({blockHeader.Hash}) - {((long)blockHeader.Number < 0 ? $"Block number is negative {blockHeader.Number}"
+                    : (long)blockHeader.GasLimit < 0 ? $"Block GasLimit is negative {blockHeader.GasLimit}"
+                    : (long)blockHeader.GasUsed < 0 ? $"Block GasUsed is negative {blockHeader.GasUsed}"
+                    : error)}");
 
             return false;
 
@@ -253,7 +247,7 @@ namespace Nethermind.Consensus.Validators
 
         protected virtual bool ValidateGasLimitRange(BlockHeader header, BlockHeader parent, IReleaseSpec spec, ref string? error)
         {
-            long adjustedParentGasLimit = Eip1559GasLimitAdjuster.AdjustGasLimit(spec, parent.GasLimit, header.Number);
+            long adjustedParentGasLimit = Eip1559GasLimitAdjuster.AdjustGasLimit(spec, (long)parent.GasLimit, header.Number);
             long maxGasLimitDifference = adjustedParentGasLimit / spec.GasLimitBoundDivisor;
 
             long maxNextGasLimit = adjustedParentGasLimit + maxGasLimitDifference;
@@ -262,7 +256,7 @@ namespace Nethermind.Consensus.Validators
             // we can check for long.MaxValue - maxGasLimitDifference < adjustedParentGasLimit to ensure that we are in range.
             // In hive we have tests that using long.MaxValue in the genesis block
             // Even if we add maxGasLimitDifference we don't get header.GasLimit higher than long.MaxValue
-            var gasLimitNotTooHigh = notToHighWithOverflow || header.GasLimit < maxNextGasLimit;
+            var gasLimitNotTooHigh = notToHighWithOverflow || header.GasLimit < (ulong)maxNextGasLimit;
 
             if (!gasLimitNotTooHigh)
             {
@@ -270,8 +264,8 @@ namespace Nethermind.Consensus.Validators
                 error = BlockErrorMessages.InvalidGasLimit;
             }
 
-            bool gasLimitNotTooLow = header.GasLimit > adjustedParentGasLimit - maxGasLimitDifference &&
-                                     header.GasLimit >= spec.MinGasLimit;
+            bool gasLimitNotTooLow = header.GasLimit > (ulong)(adjustedParentGasLimit - maxGasLimitDifference) &&
+                                     header.GasLimit >= (ulong)spec.MinGasLimit;
             if (!gasLimitNotTooLow)
             {
                 if (_logger.IsWarn) _logger.Warn($"Invalid block header ({header.Hash}) - gas limit too low. " +
@@ -325,7 +319,7 @@ namespace Nethermind.Consensus.Validators
 
         private bool ValidateGenesis(BlockHeader header) =>
             header.GasUsed < header.GasLimit &&
-            header.GasLimit > _specProvider.GenesisSpec.MinGasLimit &&
+            header.GasLimit > (ulong)_specProvider.GenesisSpec.MinGasLimit &&
             header.Timestamp > 0 &&
             header.Number == 0 &&
             header.Bloom is not null &&

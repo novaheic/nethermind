@@ -190,8 +190,8 @@ namespace Nethermind.Consensus.Processing
             Metrics.Transactions += txs.Length;
             Metrics.TotalDifficulty = block.TotalDifficulty ?? UInt256.Zero;
             Metrics.LastDifficulty = block.Difficulty;
-            Metrics.GasUsed = block.GasUsed;
-            Metrics.GasLimit = block.GasLimit;
+            Metrics.GasUsed = (long)block.GasUsed;
+            Metrics.GasLimit = (long)block.GasLimit;
 
             long chunkOpCodes = (_opCodes += data.CurrentOpCodes - data.StartOpCodes);
             long chunkCalls = (_callOps += data.CurrentCallOps - data.StartCallOps);
@@ -308,7 +308,7 @@ namespace Nethermind.Consensus.Processing
                 MedianGas = Math.Max(Evm.Metrics.BlockMinGasPrice, Evm.Metrics.BlockEstMedianGasPrice),
                 AveGas = Evm.Metrics.BlockAveGasPrice,
                 MaxGas = Evm.Metrics.BlockMaxGasPrice,
-                GasLimit = block.GasLimit
+                GasLimit = (long)block.GasLimit
             });
 
             _lastElapsedRunningMicroseconds = data.RunningMicroseconds;

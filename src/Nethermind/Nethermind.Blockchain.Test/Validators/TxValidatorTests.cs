@@ -628,7 +628,7 @@ public class TxValidatorTests
     public void IsWellFormed_TransactionWithGasLimitExceedingEip7825Cap_ReturnsFalse()
     {
         Transaction tx = Build.A.Transaction
-            .WithGasLimit(Eip7825Constants.DefaultTxGasLimitCap + 1)
+            .WithGasLimit((ulong)Eip7825Constants.DefaultTxGasLimitCap + 1)
             .WithChainId(TestBlockchainIds.ChainId)
             .SignedAndResolved().TestObject;
 
@@ -640,7 +640,7 @@ public class TxValidatorTests
         using (Assert.EnterMultipleScope())
         {
             Assert.That(result.AsBool, Is.False);
-            Assert.That(result.Error, Is.EqualTo(TxErrorMessages.TxGasLimitCapExceeded(tx.GasLimit, Eip7825Constants.DefaultTxGasLimitCap)));
+            Assert.That(result.Error, Is.EqualTo(TxErrorMessages.TxGasLimitCapExceeded((long)tx.GasLimit, Eip7825Constants.DefaultTxGasLimitCap)));
         }
     }
 
@@ -670,6 +670,7 @@ public class TxValidatorTests
         TransactionBuilder<Transaction> builder = Build.A.Transaction
             .WithType(txType)
             .WithNonce(nonce)
+            .WithGasLimit(100000)
             .WithChainId(TestBlockchainIds.ChainId);
         if (txType == TxType.Blob)
         {

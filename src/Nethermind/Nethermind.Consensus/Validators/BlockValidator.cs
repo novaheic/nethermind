@@ -166,8 +166,8 @@ public class BlockValidator(
         error = null;
         if (processedBlock.Header.GasUsed != suggestedBlock.Header.GasUsed)
         {
-            if (_logger.IsWarn) _logger.Warn($"- gas used: expected {suggestedBlock.Header.GasUsed}, got {processedBlock.Header.GasUsed} (diff: {processedBlock.Header.GasUsed - suggestedBlock.Header.GasUsed})");
-            error ??= BlockErrorMessages.HeaderGasUsedMismatch(suggestedBlock.Header.GasUsed, processedBlock.Header.GasUsed);
+            if (_logger.IsWarn) _logger.Warn($"- gas used: expected {suggestedBlock.Header.GasUsed}, got {processedBlock.Header.GasUsed} (diff: {(long)processedBlock.Header.GasUsed - (long)suggestedBlock.Header.GasUsed})");
+            error ??= BlockErrorMessages.HeaderGasUsedMismatch((long)suggestedBlock.Header.GasUsed, (long)processedBlock.Header.GasUsed);
         }
 
         if (processedBlock.Header.Bloom != suggestedBlock.Header.Bloom)

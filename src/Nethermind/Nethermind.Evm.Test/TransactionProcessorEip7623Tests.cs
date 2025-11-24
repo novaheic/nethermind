@@ -62,7 +62,7 @@ public class TransactionProcessorEip7623Tests
             .WithMaxFeePerGas(1)
             .WithTo(TestItem.AddressB)
             .WithValue(100.GWei())
-            .WithGasLimit(gasLimit)
+            .WithGasLimit((ulong)gasLimit)
             .SignedAndResolved(_ethereumEcdsa, TestItem.PrivateKeyA)
             .TestObject;
 
@@ -88,7 +88,7 @@ public class TransactionProcessorEip7623Tests
             .WithMaxFeePerGas(1)
             .WithTo(TestItem.AddressB)
             .WithValue(100.GWei())
-            .WithGasLimit(21010)
+            .WithGasLimit(21010ul)
             .SignedAndResolved(_ethereumEcdsa, TestItem.PrivateKeyA)
             .TestObject;
 

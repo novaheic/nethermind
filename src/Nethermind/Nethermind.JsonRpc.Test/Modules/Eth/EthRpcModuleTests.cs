@@ -357,7 +357,7 @@ public partial class EthRpcModuleTests
         Transaction createCodeTx = Build.A.Transaction
             .SignedAndResolved(TestItem.PrivateKeyA).WithChainId(TestBlockchainIds.ChainId).WithGasPrice(2)
             .WithCode(logCreateCode)
-            .WithNonce(3).WithGasLimit(210200).WithGasPrice(20.GWei()).TestObject;
+            .WithNonce(3).WithGasLimit(210200ul).WithGasPrice(20.GWei()).TestObject;
 
         var test = await TestRpcBlockchain.ForTest(SealEngineType.NethDev).Build(initialValues: 2.Ether());
 
@@ -564,7 +564,7 @@ public partial class EthRpcModuleTests
         Transaction createCodeTx = Build.A.Transaction
             .SignedAndResolved(TestItem.PrivateKeyA).WithChainId(TestBlockchainIds.ChainId).WithGasPrice(2)
             .WithCode(logCreateCode)
-            .WithNonce(3).WithGasLimit(210200).WithGasPrice(20.GWei()).TestObject;
+            .WithNonce(3).WithGasLimit(210200ul).WithGasPrice(20.GWei()).TestObject;
 
         TestRpcBlockchain? test = await TestRpcBlockchain.ForTest(SealEngineType.NethDev).Build(initialValues: 2.Ether());
 
@@ -1072,7 +1072,7 @@ public partial class EthRpcModuleTests
 
         await ctx.Test.AddFunds(new Address("0x723847c97bc651c7e8c013dbbe65a70712f02ad3"), 1.Ether());
         Transaction tx = Build.A.Transaction.WithData(new byte[] { 0, 1 })
-            .SignedAndResolved().WithChainId(TestBlockchainIds.ChainId).WithGasPrice(0).WithValue(0).WithGasLimit(210200).WithGasPrice(20.GWei()).TestObject;
+            .SignedAndResolved().WithChainId(TestBlockchainIds.ChainId).WithGasPrice(0).WithValue(0).WithGasLimit(210200ul).WithGasPrice(20.GWei()).TestObject;
 
         ulong timestamp = 10;
         Block block = Build.A.Block.WithNumber(1).WithTimestamp(timestamp)
@@ -1109,7 +1109,7 @@ public partial class EthRpcModuleTests
         using Context ctx = await Context.CreateWithLondonEnabled();
         await ctx.Test.AddFundsAfterLondon((new Address("0x723847c97bc651c7e8c013dbbe65a70712f02ad3"), 1.Ether()));
         Transaction tx = Build.A.Transaction.WithData(new byte[] { 0, 1 })
-            .SignedAndResolved().WithChainId(TestBlockchainIds.ChainId).WithGasPrice(0).WithValue(0).WithGasLimit(210200)
+            .SignedAndResolved().WithChainId(TestBlockchainIds.ChainId).WithGasPrice(0).WithValue(0).WithGasLimit(210200ul)
             .WithType(TxType.EIP1559).WithMaxFeePerGas(20.GWei()).WithMaxPriorityFeePerGas(1.GWei()).TestObject;
         await ctx.Test.AddBlock(tx);
         string serialized = await ctx.Test.TestEthRpc("eth_getTransactionReceipt", tx.Hash!.ToString());
@@ -1123,7 +1123,7 @@ public partial class EthRpcModuleTests
         using Context ctx = await Context.CreateWithLondonEnabled();
         await ctx.Test.AddFundsAfterLondon((new Address("0x723847c97bc651c7e8c013dbbe65a70712f02ad3"), 1.Ether()));
         Transaction tx = Build.A.Transaction.WithData(new byte[] { 0, 1 })
-            .SignedAndResolved().WithChainId(TestBlockchainIds.ChainId).WithGasPrice(0).WithValue(0).WithGasLimit(210200)
+            .SignedAndResolved().WithChainId(TestBlockchainIds.ChainId).WithGasPrice(0).WithValue(0).WithGasLimit(210200ul)
             .WithType(TxType.EIP1559).WithMaxFeePerGas(20.GWei()).WithMaxPriorityFeePerGas(1.GWei()).TestObject;
         await ctx.Test.AddBlock(tx);
         string serialized = await ctx.Test.TestEthRpc("eth_getTransactionByHash", tx.Hash!.ToString());
@@ -1285,14 +1285,14 @@ public partial class EthRpcModuleTests
     [TestCase(0)]
     public static void ToTransactionWithDefaults_and_EnsureDefaults_same_GasLimit(long? gasCap)
     {
-        long toTransactionWitDefaultsGasLimit;
+        ulong toTransactionWitDefaultsGasLimit;
         {
             var rpcTx = new LegacyTransactionForRpc();
             Transaction tx = rpcTx.ToTransaction();
             toTransactionWitDefaultsGasLimit = tx.GasLimit;
         }
 
-        long ensureDefaultsGasLimit;
+        ulong ensureDefaultsGasLimit;
         {
             var rpcTx = new LegacyTransactionForRpc();
             rpcTx.EnsureDefaults(gasCap);

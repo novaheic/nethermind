@@ -74,7 +74,7 @@ public class HeaderValidatorTests
     [Test, MaxTime(Timeout.MaxTestTime)]
     public void When_gas_limit_too_high()
     {
-        _block.Header.GasLimit = _parentBlock.Header.GasLimit + (long)BigInteger.Divide(_parentBlock.Header.GasLimit, 1024);
+        _block.Header.GasLimit = _parentBlock.Header.GasLimit + (ulong)BigInteger.Divide(_parentBlock.Header.GasLimit, 1024);
         _block.Header.Hash = _block.CalculateHash();
 
         bool result = _validator.Validate(_block.Header, _parentBlock.Header);
@@ -84,7 +84,7 @@ public class HeaderValidatorTests
     [Test, MaxTime(Timeout.MaxTestTime)]
     public void When_gas_limit_just_correct_high()
     {
-        _block.Header.GasLimit = _parentBlock.Header.GasLimit + (long)BigInteger.Divide(_parentBlock.Header.GasLimit, 1024) - 1;
+        _block.Header.GasLimit = _parentBlock.Header.GasLimit + (ulong)BigInteger.Divide(_parentBlock.Header.GasLimit, 1024) - 1;
         _block.Header.Hash = _block.CalculateHash();
 
         bool result = _validator.Validate(_block.Header, _parentBlock.Header);
@@ -94,7 +94,7 @@ public class HeaderValidatorTests
     [Test, MaxTime(Timeout.MaxTestTime)]
     public void When_gas_limit_just_correct_low()
     {
-        _block.Header.GasLimit = _parentBlock.Header.GasLimit - (long)BigInteger.Divide(_parentBlock.Header.GasLimit, 1024) + 1;
+        _block.Header.GasLimit = _parentBlock.Header.GasLimit - (ulong)BigInteger.Divide(_parentBlock.Header.GasLimit, 1024) + 1;
         _block.Header.Hash = _block.CalculateHash();
 
         bool result = _validator.Validate(_block.Header, _parentBlock.Header);
@@ -104,7 +104,7 @@ public class HeaderValidatorTests
     [Test, MaxTime(Timeout.MaxTestTime)]
     public void When_gas_limit_is_just_too_low()
     {
-        _block.Header.GasLimit = _parentBlock.Header.GasLimit - (long)BigInteger.Divide(_parentBlock.Header.GasLimit, 1024);
+        _block.Header.GasLimit = _parentBlock.Header.GasLimit - (ulong)BigInteger.Divide(_parentBlock.Header.GasLimit, 1024);
         _block.Header.Hash = _block.CalculateHash();
 
         bool result = _validator.Validate(_block.Header, _parentBlock.Header);
@@ -172,21 +172,21 @@ public class HeaderValidatorTests
     }
 
     [MaxTime(Timeout.MaxTestTime)]
-    [TestCase(10000000, 4, 20000000, true)]
-    [TestCase(10000000, 4, 20019530, true)]
-    [TestCase(10000000, 4, 20019531, false)]
-    [TestCase(10000000, 4, 19980470, true)]
-    [TestCase(10000000, 4, 19980469, false)]
-    [TestCase(20000000, 5, 20000000, true)]
-    [TestCase(20000000, 5, 20019530, true)]
-    [TestCase(20000000, 5, 20019531, false)]
-    [TestCase(20000000, 5, 19980470, true)]
-    [TestCase(20000000, 5, 19980469, false)]
-    [TestCase(40000000, 5, 40039061, true)]
-    [TestCase(40000000, 5, 40039062, false)]
-    [TestCase(40000000, 5, 39960939, true)]
-    [TestCase(40000000, 5, 39960938, false)]
-    public void When_gaslimit_is_on_london_fork(long parentGasLimit, long blockNumber, long gasLimit, bool expectedResult)
+    [TestCase(10000000UL, 4, 20000000UL, true)]
+    [TestCase(10000000UL, 4, 20019530UL, true)]
+    [TestCase(10000000UL, 4, 20019531UL, false)]
+    [TestCase(10000000UL, 4, 19980470UL, true)]
+    [TestCase(10000000UL, 4, 19980469UL, false)]
+    [TestCase(20000000UL, 5, 20000000UL, true)]
+    [TestCase(20000000UL, 5, 20019530UL, true)]
+    [TestCase(20000000UL, 5, 20019531UL, false)]
+    [TestCase(20000000UL, 5, 19980470UL, true)]
+    [TestCase(20000000UL, 5, 19980469UL, false)]
+    [TestCase(40000000UL, 5, 40039061UL, true)]
+    [TestCase(40000000UL, 5, 40039062UL, false)]
+    [TestCase(40000000UL, 5, 39960939UL, true)]
+    [TestCase(40000000UL, 5, 39960938UL, false)]
+    public void When_gaslimit_is_on_london_fork(ulong parentGasLimit, long blockNumber, ulong gasLimit, bool expectedResult)
     {
         OverridableReleaseSpec spec = new(London.Instance)
         {
@@ -245,7 +245,7 @@ public class HeaderValidatorTests
     [Test, MaxTime(Timeout.MaxTestTime)]
     public void When_gas_used_is_negative()
     {
-        _block.Header.GasUsed = -1;
+        _block.Header.GasUsed = ulong.MaxValue;
         _block.Header.Hash = _block.CalculateHash();
 
         bool result = _validator.Validate(_block.Header, _parentBlock.Header);
@@ -298,7 +298,7 @@ public class HeaderValidatorTests
     [Test, MaxTime(Timeout.MaxTestTime)]
     public void When_gas_limit_is_negative()
     {
-        _block.Header.GasLimit = -1;
+        _block.Header.GasLimit = ulong.MaxValue;
         _block.Header.Hash = _block.CalculateHash();
 
         bool result = _validator.Validate(_block.Header, _parentBlock.Header);

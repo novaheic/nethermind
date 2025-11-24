@@ -64,7 +64,7 @@ internal class TransactionProcessorEip4844Tests
             .WithGasPrice(1)
             .WithMaxFeePerGas(1)
             .WithMaxFeePerBlobGas(maxFeePerBlobGas)
-            .WithGasLimit(gasLimit)
+            .WithGasLimit((ulong)gasLimit)
             .WithShardBlobTxTypeAndFields(blobCount)
             .SignedAndResolved(_ethereumEcdsa, TestItem.PrivateKeyA)
             .TestObject;
@@ -72,7 +72,7 @@ internal class TransactionProcessorEip4844Tests
         Block block = Build.A.Block
             .WithNumber(1)
             .WithTransactions(blobTx)
-            .WithGasLimit(gasLimit)
+            .WithGasLimit((ulong)gasLimit)
             .WithExcessBlobGas(excessBlobGas)
             .WithBaseFeePerGas(1)
             .TestObject;
